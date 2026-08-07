@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Nonaktifkan session.auto_start
+php_flag session.auto_start off
+
+# Existing rules
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]

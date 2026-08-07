@@ -1,0 +1,18 @@
+.popover {
+	position: absolute;
+	display: none;
+	z-index: 1070;
+	max-width: 276px;
+	padding: 1px;
+	text-align: left;
+	white-space: normal;
+}
+
+.popover.show {
+	display: block;
+}
+
+.popover-body {
+	padding: 0.5rem 0.75rem;
+	color: #212529;
+}

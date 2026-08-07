@@ -1,0 +1,311 @@
+body.login-page {
+	background-image: url('../images/bg-3.jpg');
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.text-cakra {
+	color: #884ea0 !important;
+}
+
+.btn-cakra {
+	--ct-btn-color: #fff !important;
+	--ct-btn-bg: #884ea0 !important;
+	--ct-btn-border-color: #884ea0 !important;
+	--ct-btn-hover-color: #fff;
+	--ct-btn-hover-bg: #884ea0 !important;
+	--ct-btn-hover-border-color: #884ea0 !important;
+	--ct-btn-focus-shadow-rgb: 125, 113, 226;
+	--ct-btn-active-color: #fff !important;
+	--ct-btn-active-bg: #884ea0 !important;
+	--ct-btn-active-border-color: #884ea0 !important;
+	--ct-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125) !important;
+	--ct-btn-disabled-color: #fff !important;
+	--ct-btn-disabled-bg: #884ea0 !important;
+	--ct-btn-disabled-border-color: #884ea0 !important;
+}
+
+.bordered-table {
+	border-spacing: 0;
+	border-collapse: separate;
+	border: 1px solid #d1d5db !important;
+	border-radius: 0;
+	font-family:
+		'Inter',
+		-apple-system,
+		BlinkMacSystemFont,
+		'Segoe UI',
+		'Oxygen',
+		'Ubuntu',
+		'Cantarell',
+		'Fira Sans',
+		'Droid Sans',
+		'Helvetica Neue',
+		sans-serif !important;
+}
+
+.bordered-table thead tr th {
+	background-color: rgba(47, 43, 61, 0.08) !important;
+	border-bottom: 1px solid #d1d5db !important;
+	padding: 16px !important;
+	font-weight: 600;
+}
+
+.bordered-table thead tr th:first-child {
+	border-start-start-radius: 0;
+}
+
+.bordered-table thead tr th:last-child {
+	border-start-end-radius: 0;
+}
+
+.bordered-table thead tr th:not(:last-child) {
+	border-inline-end: 0 !important;
+}
+
+.bordered-table thead tr th:not(:first-child) {
+	border-inline-start: 0 !important;
+}
+
+.bordered-table tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.bordered-table tbody tr:last-child td:first-child {
+	border-end-start-radius: 0;
+}
+
+.bordered-table tbody tr:last-child td:last-child {
+	border-end-end-radius: 0;
+}
+
+.bordered-table tbody tr td {
+	color: var(--text-secondary-light);
+	padding: 16px !important;
+	background-color: var(--white);
+	vertical-align: middle;
+}
+
+.bordered-table tbody tr td.hiddenrow {
+	color: var(--bs-black);
+	padding: 0 !important;
+	border-bottom: 1px solid var(--neutral-200);
+	vertical-align: middle;
+}
+
+/* Set width for columns to match header */
+.accordion-body-custom .table td {
+	width: 16.66%; /* Sesuaikan dengan jumlah kolom */
+	padding: 16px; /* Samakan padding dengan header */
+}
+
+.accordion-body-custom .table {
+	table-layout: fixed; /* Menyelaraskan layout kolom */
+}
+
+.bordered-table tbody tr td.hiddenrow .accordion-body-custom {
+	padding: 0; /* Hilangkan padding default untuk penyesuaian */
+}
+
+.bordered-table thead th {
+	width: 16.66%; /* Sesuaikan dengan jumlah kolom */
+}
+
+@media only screen and (max-width: 942px) {
+	.bordered-table tbody tr td {
+		padding-left: 30px !important;
+		padding-top: 16px !important;
+		padding-right: 16px !important;
+		padding-bottom: 16px !important;
+	}
+}
+
+.tab-header {
+	padding: 1rem 1rem;
+	margin-bottom: 0;
+	border-bottom: 1px solid #e9ebec;
+}
+
+.tab-body {
+	-webkit-box-flex: 1;
+	-ms-flex: 1 1 auto;
+	flex: 1 1 auto;
+	padding: 1rem 1rem;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('../font/SFProText-Light.ttf') format('truetype');
+	font-weight: 300;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('../font/SFProText-LightItalic.ttf') format('truetype');
+	font-weight: 300;
+	font-style: italic;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('../font/SFProText-Regular.ttf') format('truetype');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('../font/SFProText-RegularItalic.ttf') format('truetype');
+	font-weight: 400;
+	font-style: italic;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('../font/SFProText-Medium.ttf') format('truetype');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('../font/SFProText-MediumItalic.ttf') format('truetype');
+	font-weight: 500;
+	font-style: italic;
+}
+
+.text-putih {
+	color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.btn-default-2 {
+	background-color: #fff;
+	border: 2px solid #f1f1f5;
+	color: #4e5e6a;
+}
+
+.btn-default-2:hover {
+	background-color: #884ea0;
+	border: 2px solid #884ea0;
+	color: #fff;
+}
+
+.btn-default-2:active {
+	background-color: #884ea0;
+	border: 2px solid #884ea0;
+	color: #fff;
+}
+
+.btn-custom {
+	background-color: #800080;
+	border: 2px solid #800080;
+	color: #fff;
+}
+
+.btn-custom:hover {
+	background-color: #800080;
+	border: 2px solid #800080;
+	color: #fff;
+}
+
+.btn-custom:active {
+	background-color: #800080;
+	border: 2px solid #800080;
+	color: #fff;
+}
+
+.border-custom {
+	border-color: #800080 !important;
+	opacity: 1 !important;
+}
+
+.pt-10 {
+	padding-top: 10rem !important;
+}
+
+.fc-event {
+	border-left-width: 4px !important;
+	border-radius: 4px !important;
+	margin-bottom: 2px !important;
+}
+
+.fc-daygrid-event {
+	padding: 2px 4px !important;
+}
+
+.fc-event-title {
+	font-weight: 500 !important;
+}
+
+.fc-daygrid-block-event .fc-event-main {
+	padding: 2px 4px !important;
+}
+
+.fc-daygrid-dot-event {
+	padding: 4px !important;
+}
+
+/* Hide "more" link - show all events */
+.fc-daygrid-more-link {
+	display: none !important;
+}
+
+/* Force show all events - remove height limit */
+.fc .fc-daygrid-day-frame {
+	min-height: 100px !important;
+	height: auto !important;
+	overflow: visible !important;
+}
+
+.fc .fc-daygrid-day-events {
+	min-height: auto !important;
+	padding-bottom: 8px !important;
+	position: relative !important;
+	overflow: visible !important;
+}
+
+/* Remove fixed height on day cells */
+.fc .fc-daygrid-body-balanced .fc-daygrid-day-events {
+	position: relative !important;
+	overflow: visible !important;
+}
+
+.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
+	min-height: auto !important;
+	position: relative !important;
+	overflow: visible !important;
+}
+
+.fc-daygrid-event-harness {
+	margin-bottom: 1px !important;
+	position: relative !important;
+	visibility: visible !important;
+}
+
+.fc-daygrid-event-harness-abs {
+	position: relative !important;
+	visibility: visible !important;
+}
+
+.fc .fc-daygrid-body tr {
+	height: auto !important;
+}
+
+.fc .fc-scrollgrid-sync-table {
+	height: auto !important;
+}
+
+.fc-daygrid-day-bottom {
+	display: none !important;
+}
+
+.fc-list-event-title a,
+.fc-list-event-title {
+	color: inherit !important;
+}
+
+.fc-list-event-graphic .fc-list-event-dot {
+	border-width: 6px !important;
+}

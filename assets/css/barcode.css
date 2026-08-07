@@ -1,0 +1,17 @@
+body {
+	font-family: monospace, sans-serif;
+	font-size: 6pt;
+	margin: 0;
+	padding: 0;
+}
+
+.barcode table.barcode tr td.no-order {
+	letter-spacing: 4pt;
+	text-align: center;
+	padding: 0;
+	margin: 0;
+}
+
+.barcode-container img {
+	width: 100%;
+}

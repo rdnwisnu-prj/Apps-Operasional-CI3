@@ -1,0 +1,38 @@
+# CodeIgniter cache, logs, dan session
+application/cache/*
+!application/cache/index.html
+
+application/logs/*
+!application/logs/index.html
+
+application/sessions/*
+!application/sessions/index.html
+
+# Konfigurasi rahasia
+application/config/database.php
+
+# File environment
+.env
+
+# File upload pengguna
+uploads/*
+!uploads/index.html
+assets/uploads/*
+!assets/uploads/index.html
+assets/upload/*
+!assets/upload/index.html
+
+# File editor dan OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Dependency lokal
+vendor/
+node_modules/
+
+# File sementara
+*.log
+*.tmp
+*.zip

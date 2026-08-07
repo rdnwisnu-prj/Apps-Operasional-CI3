@@ -1,0 +1,34 @@
+/* Font */
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&ampdisplay=swap');
+
+/* Vendor */
+@import url('../../vendor/template/material/assets/libs/quill/quill.core.css');
+@import url('../../vendor/template/material/assets/libs/quill/quill.bubble.css');
+@import url('../../vendor/template/material/assets/libs/quill/quill.snow.css');
+@import url('../../vendor/template/material/assets/libs/fullcalendar/main.min.css');
+@import url('../../vendor/template/material/assets/libs/jsvectormap/css/jsvectormap.min.css');
+@import url('../../vendor/template/material/assets/libs/swiper/swiper-bundle.min.css');
+
+/* Sweet Alert */
+@import url('../libs/sweetalert2/sweetalert2.min.css');
+
+/* Datatable */
+@import url('https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css');
+@import url('https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap.min.css');
+@import url('https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css');
+
+@import url('../../vendor/template/material/assets/libs/dropzone/dropzone.css');
+
+/* Select2 */
+@import url('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
+
+/* Core CSS */
+@import url('../../vendor/template/material/assets/css/bootstrap.min.css');
+@import url('../../vendor/template/material/assets/css/icons.min.css');
+@import url('../../vendor/template/material/assets/css/app.min.css');
+@import url('../../vendor/template/material/assets/css/custom.min.css');
+
+/* Custom CSS */
+@import url('style.css');
+@import url('custom.css');
