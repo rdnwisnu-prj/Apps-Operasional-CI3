@@ -14,7 +14,7 @@ jobs:
   deploy:
     name: Deployment production FTPS
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 120
 
     steps:
       - name: Ambil source code
@@ -38,7 +38,7 @@ jobs:
           test -n "$FTP_PASSWORD"
           test -n "$FTP_PORT"
 
-      - name: Simulasi upload ke production
+      - name: Upload source ke production
         shell: bash
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
@@ -50,14 +50,16 @@ jobs:
             -u "$FTP_USERNAME","$FTP_PASSWORD" \
             -p "$FTP_PORT" \
             "$FTP_SERVER" <<'LFTP_COMMANDS'
+
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:passive-mode true
           set ssl:verify-certificate true
-          set net:max-retries 2
-          set net:timeout 30
+          set ssl:check-hostname false
+          set net:max-retries 3
+          set net:timeout 60
 
-          mirror --reverse --verbose --parallel=2 \
+          mirror --reverse --verbose --parallel=4 \
             --exclude-glob=.git/** \
             --exclude-glob=.github/** \
             --exclude-glob=.gitignore \
