@@ -20,12 +20,34 @@ jobs:
       - name: Ambil source code
         uses: actions/checkout@v5
 
+      - name: Siapkan PHP dan Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Instal dependency production
+        shell: bash
+        run: |
+          composer install \
+            --no-dev \
+            --prefer-dist \
+            --no-interaction \
+            --no-progress \
+            --optimize-autoloader
+
+          test -f vendor/autoload.php
+
+          echo "Vendor Composer berhasil dibuat."
+          du -sh vendor
+
       - name: Instal lftp
         run: |
           sudo apt-get update
           sudo apt-get install -y lftp
 
-      - name: Validasi konfigurasi
+      - name: Validasi konfigurasi FTP
         shell: bash
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
@@ -37,24 +59,8 @@ jobs:
           test -n "$FTP_USERNAME"
           test -n "$FTP_PASSWORD"
           test -n "$FTP_PORT"
-          
-      - name: Siapkan PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-          tools: composer:v2
-          coverage: none
 
-      - name: Instal dependency production
-        run: |
-          composer install \
-            --no-dev \
-            --prefer-dist \
-            --no-interaction \
-            --no-progress \
-            --optimize-autoloader
-
-      - name: Upload source ke production
+      - name: Upload source dan vendor ke production
         shell: bash
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
