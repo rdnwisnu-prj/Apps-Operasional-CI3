@@ -34,7 +34,7 @@ class Project_model extends CI_Model
 
     public function getProjectDetail($kode_project)
     {
-        $this->db->select('tab_project.*, tab_perusahaan.nama_perusahaan, tab_perusahaan.no_tlp, tab_perusahaan.email, tab_perusahaan.alamat_perusahaan, tab_perusahaan.nama_pic, tab_perusahaan.tlp_pic, tab_site.nama_site, tab_site.provinsi, tab_site.kota, tab_site.keterangan as site_keterangan, tab_provinsi.nama_provinsi, tab_kota.nama_kota, u.nama as created_by');
+        $this->db->select('tab_project.*, tab_perusahaan.nama_perusahaan, tab_perusahaan.no_tlp, tab_perusahaan.email, tab_perusahaan.alamat_perusahaan, tab_perusahaan.nama_pic, tab_perusahaan.tlp_pic, tab_perusahaan.client_id AS marketing_client_id, tab_site.nama_site, tab_site.provinsi, tab_site.kota, tab_site.keterangan as site_keterangan, tab_provinsi.nama_provinsi, tab_kota.nama_kota, u.nama as created_by');
         $this->db->from('tab_project');
         $this->db->join('tab_perusahaan', 'tab_perusahaan.id_perusahaan = tab_project.perusahaan_id', 'left');
         $this->db->join('tab_site', 'tab_site.id_site = tab_project.site_id', 'left');
@@ -48,6 +48,34 @@ class Project_model extends CI_Model
     public function getProjectById($kode_project)
     {
         return $this->db->get_where('tab_project', ['kode_project' => $kode_project])->row_array();
+    }
+
+    public function getProjectExpenseSyncPayload($kode_project)
+    {
+        $project = $this->getProjectDetail($kode_project);
+        if (!$project) {
+            return false;
+        }
+
+        $summary = $this->getProjectFinancialSummary($kode_project);
+        $expenseByProcess = $summary['expense_by_process'] ?? [];
+
+        return [
+            'marketing_project_id' => (int) ($project['marketing_project_id'] ?? 0),
+            'marketing_site_id' => (int) ($project['marketing_site_id'] ?? 0),
+            'client_id' => (int) ($project['marketing_client_id'] ?? ($project['client_id'] ?? 0)),
+            'kode_project' => $project['kode_project'],
+            'nama_project' => $project['nama_project'] ?? '',
+            'nama_site' => $project['nama_site'] ?? '',
+            'expenses' => [
+                'setting_mcu' => (float) ($expenseByProcess['1']['total'] ?? 0),
+                'pelaksanaan_mcu' => (float) ($expenseByProcess['2']['total'] ?? 0),
+                'bongkar_setting' => (float) ($expenseByProcess['3']['total'] ?? 0),
+                'kirim_hasil' => (float) ($expenseByProcess['4']['total'] ?? 0),
+                'grand_total' => (float) ($summary['grand_expense'] ?? 0),
+            ],
+            'synced_at' => date('Y-m-d H:i:s'),
+        ];
     }
 
     public function canKorlapAccessProject($kode_project, $user_id)

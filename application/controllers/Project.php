@@ -416,6 +416,37 @@ class Project extends CI_Controller
         redirect('Project');
     }
 
+    public function syncExpenseToMarketing($kode_project = null)
+    {
+        if (!$this->requireProjectManager()) {
+            return;
+        }
+
+        $kode_project = $kode_project ? urldecode($kode_project) : null;
+        if (!$kode_project) {
+            $this->session->set_flashdata('error', 'Kode project tidak valid');
+            redirect('Project');
+            return;
+        }
+
+        $payload = $this->project->getProjectExpenseSyncPayload($kode_project);
+        if (!$payload) {
+            $this->session->set_flashdata('error', 'Data project tidak ditemukan');
+            redirect('Project');
+            return;
+        }
+
+        $result = $this->marketing_api->sendProjectSiteExpense($payload);
+
+        if ($result['success']) {
+            $this->session->set_flashdata('flash', $result['message']);
+        } else {
+            $this->session->set_flashdata('error', $result['message']);
+        }
+
+        redirect('Project/detail/' . rawurlencode($kode_project));
+    }
+
     public function getSites()
     {
         $perusahaan_id = $this->input->get('perusahaan_id');

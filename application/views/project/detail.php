@@ -244,9 +244,17 @@ foreach ($process_finance as $processKey => $processRow) {
                     </ol>
                 </nav>
             </div>
-            <a href="<?= base_url('Project'); ?>" class="btn btn-outline-light">
-                <i class="ti ti-arrow-left me-1"></i>Kembali
-            </a>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <?php if ((int) $this->session->userdata('role_id') !== 8): ?>
+                <a href="<?= base_url('Project/syncExpenseToMarketing/' . rawurlencode($project_detail['kode_project'])); ?>"
+                    class="btn btn-primary">
+                    <i class="ti ti-cloud-upload me-1"></i>Sync Pengeluaran
+                </a>
+                <?php endif; ?>
+                <a href="<?= base_url('Project'); ?>" class="btn btn-outline-light">
+                    <i class="ti ti-arrow-left me-1"></i>Kembali
+                </a>
+            </div>
         </div>
 
         <div class="row g-3 mb-4">

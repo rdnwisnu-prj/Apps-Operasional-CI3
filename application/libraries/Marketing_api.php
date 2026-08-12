@@ -5,11 +5,13 @@ class Marketing_api
 {
     protected $CI;
     protected $api_base_url;
+    protected $expense_api_url;
 
     public function __construct()
     {
         $this->CI =& get_instance();
-        $this->api_base_url = 'https://marketing.cakramedika.co.id/Api/Client_api';
+        $this->api_base_url = getenv('MARKETING_API_BASE_URL') ?: 'https://marketing.cakramedika.co.id/Api/Client_api';
+        $this->expense_api_url = getenv('MARKETING_EXPENSE_API_URL') ?: 'http://localhost:8000/Apps-Marketing/Api/Client_api/project_site_expense';
     }
 
     public function getClients()
@@ -240,6 +242,29 @@ class Marketing_api
             'inserted_companies' => $insertedCompanies,
             'updated_companies' => $updatedCompanies,
             'skipped' => $skipped,
+        ];
+    }
+
+    public function sendProjectSiteExpense($payload)
+    {
+        if (empty($payload['marketing_project_id']) || empty($payload['marketing_site_id'])) {
+            return ['success' => false, 'message' => 'Mapping project/site marketing belum tersedia'];
+        }
+
+        $response = $this->_postJson($this->expense_api_url, $payload);
+
+        if ($response && isset($response['status']) && $response['status'] === true) {
+            return [
+                'success' => true,
+                'message' => $response['message'] ?? 'Pengeluaran berhasil dikirim ke Marketing',
+                'data' => $response['data'] ?? null,
+            ];
+        }
+
+        return [
+            'success' => false,
+            'message' => $response['message'] ?? 'Gagal mengirim pengeluaran ke Marketing',
+            'response' => $response,
         ];
     }
 
@@ -502,6 +527,58 @@ class Marketing_api
         if (json_last_error() !== JSON_ERROR_NONE) {
             log_message('error', 'Marketing_api JSON Error: ' . json_last_error_msg());
             return false;
+        }
+
+        return $decoded;
+    }
+
+    private function _postJson($url, $payload)
+    {
+        if (!function_exists('curl_init')) {
+            log_message('error', 'Marketing_api: cURL extension tidak tersedia');
+            return false;
+        }
+
+        $body = json_encode($payload);
+        if ($body === false) {
+            log_message('error', 'Marketing_api JSON Encode Error: ' . json_last_error_msg());
+            return false;
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $body,
+            CURLOPT_HTTPHEADER     => [
+                'Accept: application/json',
+                'Content-Type: application/json',
+            ],
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            log_message('error', 'Marketing_api cURL POST Error: ' . $error);
+            return false;
+        }
+
+        $decoded = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            log_message('error', 'Marketing_api POST JSON Error: ' . json_last_error_msg() . ' Response: ' . $response);
+            return false;
+        }
+
+        if ($http_code < 200 || $http_code >= 300) {
+            log_message('error', 'Marketing_api POST HTTP Error: ' . $http_code . ' Response: ' . $response);
+            return $decoded;
         }
 
         return $decoded;
