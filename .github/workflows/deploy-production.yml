@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Simulasi deployment FTPS
+    name: Deployment production FTPS
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
