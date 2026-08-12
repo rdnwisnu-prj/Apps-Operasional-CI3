@@ -132,6 +132,54 @@ class Project_model extends CI_Model
         return $this->db->get_where('tab_site', ['id_perusahaan' => $perusahaan_id])->result_array();
     }
 
+    public function getSiteByMarketingSiteId($marketing_site_id)
+    {
+        if (!$this->db->field_exists('marketing_site_id', 'tab_site')) {
+            return null;
+        }
+
+        return $this->db->get_where('tab_site', ['marketing_site_id' => (int) $marketing_site_id])->row_array();
+    }
+
+    public function getSiteByPerusahaanAndName($perusahaan_id, $nama_site)
+    {
+        return $this->db->get_where('tab_site', [
+            'id_perusahaan' => (int) $perusahaan_id,
+            'nama_site' => $nama_site,
+        ])->row_array();
+    }
+
+    public function storeSiteData($data)
+    {
+        return $this->db->insert('tab_site', $data);
+    }
+
+    public function updateSiteData($id_site, $data)
+    {
+        $this->db->where('id_site', $id_site);
+        return $this->db->update('tab_site', $data);
+    }
+
+    public function getProjectByMarketingSite($marketing_project_id, $marketing_site_id)
+    {
+        if (!$this->db->field_exists('marketing_project_id', 'tab_project') || !$this->db->field_exists('marketing_site_id', 'tab_project')) {
+            return null;
+        }
+
+        return $this->db->get_where('tab_project', [
+            'marketing_project_id' => (int) $marketing_project_id,
+            'marketing_site_id' => (int) $marketing_site_id,
+        ])->row_array();
+    }
+
+    public function getProjectBySiteAndName($site_id, $nama_project)
+    {
+        return $this->db->get_where('tab_project', [
+            'site_id' => (int) $site_id,
+            'nama_project' => $nama_project,
+        ])->row_array();
+    }
+
     public function getUsers()
     {
         $this->db->select('id_user, nama, role_id');

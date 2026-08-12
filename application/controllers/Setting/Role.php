@@ -109,6 +109,7 @@ class Role extends CI_Controller
                 foreach ($submenus as $submenu) {
                     $this->db->where('role_id', $role_id);
                     $this->db->where('submenu_access', $submenu['id_submenu']);
+                    $this->db->where('access', 1);
                     $access = $this->db->get('tab_access')->row_array();
                     
                     $menu_item['submenus'][] = [
@@ -121,6 +122,7 @@ class Role extends CI_Controller
                 $this->db->where('role_id', $role_id);
                 $this->db->where('menu_access', $menu['id_menu']);
                 $this->db->where('submenu_access', 0);
+                $this->db->where('access', 1);
                 $access = $this->db->get('tab_access')->row_array();
                 
                 $menu_item['has_access'] = !empty($access);

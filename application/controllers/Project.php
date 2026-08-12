@@ -9,6 +9,7 @@ class Project extends CI_Controller
         $this->load->model('Project_model','project');
         $this->load->model('Perusahaan_model','perusahaan');
         $this->load->library('form_validation');
+        $this->load->library('Marketing_api');
         is_logged_in();
         check_role_access();
     }
@@ -26,6 +27,8 @@ class Project extends CI_Controller
         }
         unset($project);
 
+        $marketingProjectSites = $this->getMarketingProjectSiteOptions($projects);
+
         $data = [
             'title'      => 'Operasional Web App | Project',
             'header'     => 'Master Data',
@@ -33,6 +36,7 @@ class Project extends CI_Controller
             'project'    => $projects,
             'perusahaan' => $this->perusahaan->getData(),
             'users'      => $this->project->getUsers(),
+            'marketing_project_sites' => $marketingProjectSites,
             'can_manage_project' => !$isKorlapOnly,
         ];
         
@@ -88,12 +92,47 @@ class Project extends CI_Controller
         }
     }
 
+    private function getMarketingProjectSiteOptions($projects)
+    {
+        $rows = $this->marketing_api->getProjectSites();
+        if (!is_array($rows)) {
+            $rows = [];
+        }
+
+        $synced = [];
+        foreach ($projects as $project) {
+            if (!empty($project['marketing_project_id']) && !empty($project['marketing_site_id'])) {
+                $synced[$project['marketing_project_id'] . '|' . $project['marketing_site_id']] = true;
+            }
+        }
+
+        foreach ($rows as &$row) {
+            $key = ((int) ($row['marketing_project_id'] ?? 0)) . '|' . ((int) ($row['marketing_site_id'] ?? 0));
+            $row['marketing_key'] = $key;
+            $row['is_synced'] = isset($synced[$key]);
+        }
+        unset($row);
+
+        return $rows;
+    }
+
     private function setRules()
     {
-        $this->form_validation->set_rules('nama_project', 'Nama Project', 'required|trim');
-        $this->form_validation->set_rules('perusahaan_id', 'Perusahaan', 'required|trim');
-        $this->form_validation->set_rules('tgl_mulai', 'Tanggal Mulai', 'required|trim');
-        $this->form_validation->set_rules('tgl_selesai', 'Tanggal Selesai', 'required|trim');
+        $this->form_validation->set_rules('marketing_project_site_key', 'Project/Site Marketing', 'required|trim');
+    }
+
+    private function splitMarketingProjectSiteKey($key)
+    {
+        $parts = explode('|', (string) $key);
+
+        if (count($parts) !== 2 || (int) $parts[0] <= 0 || (int) $parts[1] <= 0) {
+            return false;
+        }
+
+        return [
+            'marketing_project_id' => (int) $parts[0],
+            'marketing_site_id' => (int) $parts[1],
+        ];
     }
 
     private function buildPayload($isUpdate = false)
@@ -246,18 +285,34 @@ class Project extends CI_Controller
             return;
         }
 
-        $insert = $this->buildPayload(false);
-        $kode_project = $insert['kode_project'];
+        $key = $this->splitMarketingProjectSiteKey($this->input->post('marketing_project_site_key', true));
+        if (!$key) {
+            $this->session->set_flashdata('error', 'Project/Site Marketing tidak valid');
+            redirect('Project');
+            return;
+        }
 
         $this->db->trans_start();
-        $this->project->storeData($insert);
-        $this->insertKorlapRows($kode_project, $this->getKorlapRowsFromPost());
+        $result = $this->marketing_api->syncProjectSiteByKey(
+            $key['marketing_project_id'],
+            $key['marketing_site_id'],
+            ['deskripsi' => $this->input->post('deskripsi', true) ?: '']
+        );
+
+        if ($result['success']) {
+            $kode_project = $result['project']['kode_project'];
+            $korlapRows = $this->getKorlapRowsFromPost();
+            if (!empty($korlapRows)) {
+                $this->project->deleteKorlapByProject($kode_project);
+                $this->insertKorlapRows($kode_project, $korlapRows);
+            }
+        }
         $this->db->trans_complete();
 
-        if ($this->db->trans_status()) {
-            $this->session->set_flashdata('flash', 'Ditambahkan');
+        if ($this->db->trans_status() && $result['success']) {
+            $this->session->set_flashdata('flash', $result['message']);
         } else {
-            $this->session->set_flashdata('error', 'Data project gagal ditambahkan');
+            $this->session->set_flashdata('error', $result['message'] ?? 'Data project gagal ditambahkan');
         }
 
         redirect('Project');
@@ -299,16 +354,32 @@ class Project extends CI_Controller
             return;
         }
 
+        $key = $this->splitMarketingProjectSiteKey($this->input->post('marketing_project_site_key', true));
+        if (!$key) {
+            $this->session->set_flashdata('error', 'Project/Site Marketing tidak valid');
+            redirect('Project');
+            return;
+        }
+
         $this->db->trans_start();
-        $this->project->editData($kode_project, $this->buildPayload(true));
-        $this->project->deleteKorlapByProject($kode_project);
-        $this->insertKorlapRows($kode_project, $this->getKorlapRowsFromPost());
+        $result = $this->marketing_api->syncProjectSiteByKey(
+            $key['marketing_project_id'],
+            $key['marketing_site_id'],
+            [
+                'kode_project' => $kode_project,
+                'deskripsi' => $this->input->post('deskripsi', true) ?: '',
+            ]
+        );
+        if ($result['success']) {
+            $this->project->deleteKorlapByProject($kode_project);
+            $this->insertKorlapRows($kode_project, $this->getKorlapRowsFromPost());
+        }
         $this->db->trans_complete();
 
-        if ($this->db->trans_status()) {
-            $this->session->set_flashdata('flash', 'Diperbarui');
+        if ($this->db->trans_status() && $result['success']) {
+            $this->session->set_flashdata('flash', $result['message']);
         } else {
-            $this->session->set_flashdata('error', 'Data project gagal diperbarui');
+            $this->session->set_flashdata('error', $result['message'] ?? 'Data project gagal diperbarui');
         }
 
         redirect('Project');
@@ -325,6 +396,23 @@ class Project extends CI_Controller
         } else {
             $this->session->set_flashdata('error', 'Data project gagal dihapus');
         }
+        redirect('Project');
+    }
+
+    public function syncMarketingSites()
+    {
+        if (!$this->requireProjectManager()) {
+            return;
+        }
+
+        $result = $this->marketing_api->syncProjectSites();
+
+        if ($result['success']) {
+            $this->session->set_flashdata('flash', $result['message']);
+        } else {
+            $this->session->set_flashdata('error', $result['message']);
+        }
+
         redirect('Project');
     }
 

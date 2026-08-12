@@ -9,6 +9,9 @@
     <?php endif; ?>
 
     <?php
+    $baseRoute = $base_route ?? 'FeeDokter';
+    $pageLabel = $page_label ?? 'Fee Dokter';
+    $showProject = $show_project ?? true;
     $bankOptions = [
         'BCA', 'Mandiri', 'BNI', 'BSI', 'BRI', 'BTN', 'CIMB Niaga', 'Danamon', 'Permata',
         'Maybank Indonesia', 'Blu (BCA Digital)', 'Panin', 'OCBC Indonesia', 'Bank Mega',
@@ -25,7 +28,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 p-0">
                     <li class="breadcrumb-item"><a href="javascript:void(0);"><?= $header; ?></a></li>
-                    <li class="breadcrumb-item"><a href="<?= base_url('FeeDokter'); ?>">Fee Dokter</a></li>
+                    <li class="breadcrumb-item"><a href="<?= base_url($baseRoute); ?>"><?= html_escape($pageLabel); ?></a></li>
                     <li class="breadcrumb-item active"><?= $subheader; ?></li>
                 </ol>
             </nav>
@@ -35,15 +38,16 @@
             <div class="card-header bg-transparent border-bottom d-flex align-items-center">
                 <h4 class="card-title mb-0 flex-grow-1"><?= $subheader; ?></h4>
                 <div class="flex-shrink-0">
-                    <a href="<?= base_url('FeeDokter'); ?>" class="btn btn-custom">
+                    <a href="<?= base_url($baseRoute); ?>" class="btn btn-custom">
                         <i class="ri-arrow-left-circle-line align-bottom me-1"></i>Kembali
                     </a>
                 </div>
             </div>
 
             <div class="card-body">
-                <form id="form-add-fee" action="<?= base_url('FeeDokter/Store'); ?>" method="post"
+                <form id="form-add-fee" action="<?= base_url($baseRoute . '/Store'); ?>" method="post"
                     enctype="multipart/form-data">
+                    <?php if ($showProject): ?>
                     <div class="row mb-3">
                         <label for="project" class="col-form-label col-lg-2">Project <span
                                 class="text-danger">*</span></label>
@@ -61,6 +65,7 @@
                             <div class="invalid-feedback"><?= form_error('project'); ?></div>
                         </div>
                     </div>
+                    <?php endif; ?>
 
                     <div class="row mb-3">
                         <label for="tgl_project" class="col-form-label col-lg-2">Tanggal <span
@@ -169,12 +174,12 @@
                     <h5 class="mb-3"><i class="ti ti-calculator me-1"></i> Perhitungan Fee</h5>
 
                     <div class="row mb-3">
-                        <label for="jumlah_hari" class="col-form-label col-lg-2">Jumlah Hari</label>
+                        <label for="jumlah_hari" class="col-form-label col-lg-2">Jumlah Pasien</label>
                         <div class="col-lg-4">
                             <input type="number" class="form-control" id="jumlah_hari" name="jumlah_hari"
                                 placeholder="0" min="0" value="<?= set_value('jumlah_hari', '0'); ?>">
                         </div>
-                        <label for="fee_display" class="col-form-label col-lg-2">Fee / Hari (Rp)</label>
+                        <label for="fee_display" class="col-form-label col-lg-2">Fee / Pasien (Rp)</label>
                         <div class="col-lg-4">
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
@@ -287,7 +292,7 @@
             </div>
 
             <div class="card-footer border-top d-flex justify-content-between align-items-center">
-                <a href="<?= base_url('FeeDokter'); ?>">Cancel</a>
+                <a href="<?= base_url($baseRoute); ?>">Cancel</a>
                 <button type="submit" form="form-add-fee" class="btn btn-custom">
                     <i class="ri-checkbox-circle-line me-1"></i>Save
                 </button>
@@ -297,10 +302,11 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        var showProject = <?= $showProject ? 'true' : 'false'; ?>;
         var projectDates = {};
         var oldDate = '<?= html_escape($oldTanggal); ?>';
 
-        <?php foreach ($projects as $p): ?>
+        <?php foreach (($projects ?? []) as $p): ?>
         projectDates['<?= html_escape($p['kode_project']); ?>'] = {
             tgl_mulai: '<?= html_escape($p['tgl_mulai']); ?>',
             tgl_selesai: '<?= html_escape($p['tgl_selesai']); ?>'
@@ -321,12 +327,14 @@
         }
 
         if (typeof $.fn.select2 !== 'undefined') {
-            $('#project').select2({
-                theme: 'bootstrap-5',
-                placeholder: '-- Pilih Project --',
-                allowClear: true,
-                width: '100%'
-            });
+            if (showProject) {
+                $('#project').select2({
+                    theme: 'bootstrap-5',
+                    placeholder: '-- Pilih Project --',
+                    allowClear: true,
+                    width: '100%'
+                });
+            }
 
             $('#dokter_id').select2({
                 theme: 'bootstrap-5',
@@ -450,7 +458,9 @@
             toggleEmptyInfo();
         }
 
-        $('#project').off('change.feeDokter').on('change.feeDokter', updateProjectDateRange);
+        if (showProject) {
+            $('#project').off('change.feeDokter').on('change.feeDokter', updateProjectDateRange);
+        }
         $('#dokter_id').off('change.feeDokter').on('change.feeDokter', updateDoctorAccount);
         $('#jumlah_hari, #fee_display, #biaya_tambahan_display').off('input.feeDokter').on('input.feeDokter',
             function() {
@@ -476,7 +486,9 @@
                 toggleEmptyInfo();
             });
 
-        updateProjectDateRange();
+        if (showProject) {
+            updateProjectDateRange();
+        }
         updateDoctorAccount();
         hitungPajak();
         toggleEmptyInfo();

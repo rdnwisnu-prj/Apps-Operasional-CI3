@@ -1,0 +1,9 @@
+ALTER TABLE tab_site
+    ADD COLUMN IF NOT EXISTS marketing_site_id INT NULL,
+    ADD COLUMN IF NOT EXISTS client_id INT NULL,
+    ADD COLUMN IF NOT EXISTS source VARCHAR(50) NOT NULL DEFAULT 'manual';
+
+ALTER TABLE tab_project
+    ADD COLUMN IF NOT EXISTS marketing_project_id INT NULL,
+    ADD COLUMN IF NOT EXISTS marketing_site_id INT NULL,
+    ADD COLUMN IF NOT EXISTS source VARCHAR(50) NOT NULL DEFAULT 'manual';

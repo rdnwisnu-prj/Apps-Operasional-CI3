@@ -21,23 +21,6 @@
 
     <div class="sidebar-inner" data-simplebar>
         <div id="sidebar-menu" class="sidebar-menu">
-            <div class="sidebar-top shadow-sm p-2 rounded-1 mb-3 dropend">
-                <a href="javascript:void(0);" class="drop-arrow-none" data-bs-toggle="dropdown"
-                    data-bs-auto-close="outside" data-bs-offset="0,22" aria-haspopup="false" aria-expanded="false">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <span class="avatar rounded-circle flex-shrink-0 p-2"><img
-                                    src="<?= base_url('upload/employee/' . $this->session->userdata('foto')); ?>"
-                                    alt="img"></span>
-                            <div class="ms-2">
-                                <h6 class="fs-14 fw-semibold mb-0"><?php echo $this->session->userdata('nama'); ?></h6>
-                                <p class="fs-13 mb-0"><i class="ti ti-circle-filled text-success me-1"></i>Online
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
             <ul>
                 <?php  
                 $role_id = $this->session->userdata('role_id');

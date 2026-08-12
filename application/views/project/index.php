@@ -9,8 +9,21 @@ foreach ($project as $p) {
         'tgl_mulai' => $p['tgl_mulai'],
         'tgl_selesai' => $p['tgl_selesai'],
         'deskripsi' => $p['deskripsi'] ?? '',
+        'nama_perusahaan' => $p['nama_perusahaan'] ?? '',
+        'nama_site' => $p['nama_site'] ?? '',
+        'marketing_project_id' => $p['marketing_project_id'] ?? '',
+        'marketing_site_id' => $p['marketing_site_id'] ?? '',
+        'marketing_key' => (!empty($p['marketing_project_id']) && !empty($p['marketing_site_id']))
+            ? $p['marketing_project_id'] . '|' . $p['marketing_site_id']
+            : '',
+        'source' => $p['source'] ?? 'manual',
         'korlap' => $p['korlap_rows'] ?? [],
     ];
+}
+$marketing_site_payload = [];
+foreach (($marketing_project_sites ?? []) as $site) {
+    $key = $site['marketing_key'] ?? (((int) ($site['marketing_project_id'] ?? 0)) . '|' . ((int) ($site['marketing_site_id'] ?? 0)));
+    $marketing_site_payload[$key] = $site;
 }
 $user_options = array_map(function ($u) {
     return [
@@ -89,10 +102,15 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                 </nav>
             </div>
             <?php if ($can_manage_project): ?>
-            <button class="btn btn-custom" type="button" data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvas-project-add" aria-controls="offcanvas-project-add">
-                <i class="ti ti-circle-plus me-1"></i>Tambah Project
-            </button>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="<?= base_url('Project/syncMarketingSites'); ?>" class="btn btn-outline-primary">
+                    <i class="ti ti-cloud-download me-1"></i>Get Data Project/Site
+                </a>
+                <button class="btn btn-custom" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvas-project-add" aria-controls="offcanvas-project-add">
+                    <i class="ti ti-circle-plus me-1"></i>Tambah Project
+                </button>
+            </div>
             <?php endif; ?>
         </div>
 
@@ -107,6 +125,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                             <th>Perusahaan</th>
                             <th>Site</th>
                             <th>Periode</th>
+                            <th>Status Get</th>
                             <th>Korlap</th>
                             <th class="text-end">Action</th>
                         </tr>
@@ -125,6 +144,19 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                             <td>
                                 <?= !empty($p['tgl_mulai']) ? tanggal_indonesia_medium($p['tgl_mulai']) : '-'; ?> -
                                 <?= !empty($p['tgl_selesai']) ? tanggal_indonesia_medium($p['tgl_selesai']) : '-'; ?>
+                            </td>
+                            <td>
+                                <?php if (($p['source'] ?? '') === 'api_project_site'): ?>
+                                <span class="badge bg-success-subtle text-success">
+                                    <i class="ti ti-circle-check me-1"></i>Sudah Get
+                                </span>
+                                <?php if (!empty($p['marketing_site_id'])): ?>
+                                <small class="d-block text-muted">Site ID:
+                                    <?= (int) $p['marketing_site_id']; ?></small>
+                                <?php endif; ?>
+                                <?php else: ?>
+                                <span class="badge bg-secondary-subtle text-secondary">Manual</span>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php if (!empty($p['korlap_rows'])): ?>
@@ -196,40 +228,59 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                 <div class="project-form-section">
                     <div class="project-form-section-title"><i class="ti ti-briefcase"></i>Informasi Project</div>
                     <div class="mb-3">
-                        <label for="add_nama_project" class="form-label">Nama Project <span
+                        <label for="add_marketing_project_site_key" class="form-label">Project/Site Marketing <span
                                 class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="add_nama_project" name="nama_project"
-                            placeholder="Nama project" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="add_perusahaan_id" class="form-label">Perusahaan <span
-                                class="text-danger">*</span></label>
-                        <select class="form-select js-perusahaan" id="add_perusahaan_id" name="perusahaan_id" required>
-                            <option value="">-- Pilih Perusahaan --</option>
-                            <?php foreach ($perusahaan as $p): ?>
-                            <option value="<?= (int) $p['id_perusahaan']; ?>"><?= html_escape($p['nama_perusahaan']); ?>
+                        <input type="hidden" class="js-marketing-key-hidden" name="marketing_project_site_key" value="">
+                        <select class="form-select js-marketing-project-site" id="add_marketing_project_site_key"
+                            required>
+                            <option value="">-- Pilih Project/Site Marketing --</option>
+                            <?php foreach (($marketing_project_sites ?? []) as $site): ?>
+                            <?php $key = $site['marketing_key'] ?? (((int) ($site['marketing_project_id'] ?? 0)) . '|' . ((int) ($site['marketing_site_id'] ?? 0))); ?>
+                            <option value="<?= html_escape($key); ?>">
+                                <?= html_escape(($site['nama_client'] ?? '-') . ' | ' . ($site['nama_project'] ?? '-') . ' | ' . ($site['nama_site'] ?? '-') . ' | Marketing: ' . ($site['marketing_name'] ?? '-')); ?>
+                                <?= !empty($site['is_synced']) ? ' (Sudah Get)' : ''; ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="add_site_id" class="form-label">Site </label>
-                        <select class="form-select js-site" id="add_site_id" name="site_id">
-                            <option value="">-- Pilih Site --</option>
-                        </select>
+                    <div class="project-marketing-info bg-light rounded border p-3 mb-3">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Perusahaan</label>
+                                <input type="text" class="form-control bg-white js-info-perusahaan" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Marketing</label>
+                                <input type="text" class="form-control bg-white js-info-marketing" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Project</label>
+                                <input type="text" class="form-control bg-white js-info-project" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Site</label>
+                                <input type="text" class="form-control bg-white js-info-site" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Provinsi</label>
+                                <input type="text" class="form-control bg-white js-info-provinsi" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Kota</label>
+                                <input type="text" class="form-control bg-white js-info-kota" readonly>
+                            </div>
+                        </div>
                     </div>
                     <div class="row g-2">
                         <div class="col-md-6 mb-3">
-                            <label for="add_tgl_mulai" class="form-label">Tanggal Mulai <span
-                                    class="text-danger">*</span></label>
+                            <label for="add_tgl_mulai" class="form-label">Tanggal Mulai</label>
                             <input type="text" class="form-control js-project-date" id="add_tgl_mulai" name="tgl_mulai"
-                                placeholder="Pilih Tanggal Mulai" autocomplete="off" required>
+                                placeholder="Tanggal dari Marketing" autocomplete="off" readonly>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="add_tgl_selesai" class="form-label">Tanggal Selesai <span
-                                    class="text-danger">*</span></label>
+                            <label for="add_tgl_selesai" class="form-label">Tanggal Selesai</label>
                             <input type="text" class="form-control js-project-date" id="add_tgl_selesai"
-                                name="tgl_selesai" placeholder="Pilih Tanggal Selesai" autocomplete="off" required>
+                                name="tgl_selesai" placeholder="Tanggal dari Marketing" autocomplete="off" readonly>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -276,39 +327,59 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                         <input type="text" class="form-control" id="edit_kode_project_display" readonly>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_nama_project" class="form-label">Nama Project <span
+                        <label for="edit_marketing_project_site_key" class="form-label">Project/Site Marketing <span
                                 class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="edit_nama_project" name="nama_project" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_perusahaan_id" class="form-label">Perusahaan <span
-                                class="text-danger">*</span></label>
-                        <select class="form-select js-perusahaan" id="edit_perusahaan_id" name="perusahaan_id" required>
-                            <option value="">-- Pilih Perusahaan --</option>
-                            <?php foreach ($perusahaan as $p): ?>
-                            <option value="<?= (int) $p['id_perusahaan']; ?>"><?= html_escape($p['nama_perusahaan']); ?>
+                        <input type="hidden" class="js-marketing-key-hidden" name="marketing_project_site_key" value="">
+                        <select class="form-select js-marketing-project-site" id="edit_marketing_project_site_key"
+                            required>
+                            <option value="">-- Pilih Project/Site Marketing --</option>
+                            <?php foreach (($marketing_project_sites ?? []) as $site): ?>
+                            <?php $key = $site['marketing_key'] ?? (((int) ($site['marketing_project_id'] ?? 0)) . '|' . ((int) ($site['marketing_site_id'] ?? 0))); ?>
+                            <option value="<?= html_escape($key); ?>">
+                                <?= html_escape(($site['nama_client'] ?? '-') . ' | ' . ($site['nama_project'] ?? '-') . ' | ' . ($site['nama_site'] ?? '-') . ' | Marketing: ' . ($site['marketing_name'] ?? '-')); ?>
+                                <?= !empty($site['is_synced']) ? ' (Sudah Get)' : ''; ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_site_id" class="form-label">Site</label>
-                        <select class="form-select js-site" id="edit_site_id" name="site_id">
-                            <option value="">-- Pilih Site --</option>
-                        </select>
+                    <div class="project-marketing-info bg-light rounded border p-3 mb-3">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Perusahaan</label>
+                                <input type="text" class="form-control bg-white js-info-perusahaan" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Marketing</label>
+                                <input type="text" class="form-control bg-white js-info-marketing" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Project</label>
+                                <input type="text" class="form-control bg-white js-info-project" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Site</label>
+                                <input type="text" class="form-control bg-white js-info-site" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Provinsi</label>
+                                <input type="text" class="form-control bg-white js-info-provinsi" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Kota</label>
+                                <input type="text" class="form-control bg-white js-info-kota" readonly>
+                            </div>
+                        </div>
                     </div>
                     <div class="row g-2">
                         <div class="col-md-6 mb-3">
-                            <label for="edit_tgl_mulai" class="form-label">Tanggal Mulai <span
-                                    class="text-danger">*</span></label>
+                            <label for="edit_tgl_mulai" class="form-label">Tanggal Mulai</label>
                             <input type="text" class="form-control js-project-date" id="edit_tgl_mulai" name="tgl_mulai"
-                                autocomplete="off" required>
+                                autocomplete="off" readonly>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="edit_tgl_selesai" class="form-label">Tanggal Selesai <span
-                                    class="text-danger">*</span></label>
+                            <label for="edit_tgl_selesai" class="form-label">Tanggal Selesai</label>
                             <input type="text" class="form-control js-project-date" id="edit_tgl_selesai"
-                                name="tgl_selesai" autocomplete="off" required>
+                                autocomplete="off" readonly>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -338,6 +409,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         var projectData = <?= json_encode($project_payload, $json_flags); ?>;
+        var marketingSiteData = <?= json_encode($marketing_site_payload, $json_flags); ?>;
         var userOptions = <?= json_encode($user_options, $json_flags); ?>;
 
         function escapeHtml(text) {
@@ -351,7 +423,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
         function initProjectSelect2($scope) {
             if (!$.fn.select2) return;
-            $scope.find('.js-perusahaan').each(function() {
+            $scope.find('.js-marketing-project-site').each(function() {
                 var $select = $(this);
                 if ($select.data('select2')) {
                     $select.select2('destroy');
@@ -360,21 +432,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                     theme: 'bootstrap-5',
                     width: '100%',
                     dropdownParent: select2Parent($select),
-                    placeholder: '-- Pilih Perusahaan --',
-                    allowClear: true
-                });
-            });
-
-            $scope.find('.js-site').each(function() {
-                var $select = $(this);
-                if ($select.data('select2')) {
-                    $select.select2('destroy');
-                }
-                $select.select2({
-                    theme: 'bootstrap-5',
-                    width: '100%',
-                    dropdownParent: select2Parent($select),
-                    placeholder: '-- Pilih Site --',
+                    placeholder: '-- Pilih Project/Site Marketing --',
                     allowClear: true
                 });
             });
@@ -382,7 +440,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
         function initFlatpickr(container) {
             if (typeof flatpickr === 'undefined') return;
-            $(container).find('.js-project-date, .js-korlap-date').each(function() {
+            $(container).find('.js-korlap-date').each(function() {
                 if (this._flatpickr) return;
                 flatpickr(this, {
                     dateFormat: 'Y-m-d',
@@ -414,47 +472,27 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
             $select.val(value || '').trigger('change.select2');
         }
 
-        function loadSites($form, perusahaanId, selectedSite) {
-            var $site = $form.find('.js-site');
-            $site.prop('disabled', true).html('<option value="">Memuat site...</option>').trigger(
-                'change.select2');
+        function ensureMarketingOption($select, key, data) {
+            if (!key || $select.find('option[value="' + key + '"]').length) return;
+            var label = [
+                data.nama_perusahaan || '-',
+                data.nama_project || '-',
+                data.nama_site || '-'
+            ].join(' | ');
+            $select.append('<option value="' + escapeHtml(key) + '">' + escapeHtml(label) + '</option>');
+        }
 
-            if (!perusahaanId) {
-                $site.html('<option value="">-- Pilih Site --</option>').prop('disabled', false).trigger(
-                    'change.select2');
-                return $.Deferred().resolve().promise();
-            }
-
-            return $.ajax({
-                url: base_url + 'Project/getSites',
-                type: 'GET',
-                data: {
-                    perusahaan_id: perusahaanId
-                },
-                dataType: 'json'
-            }).done(function(data) {
-                $site.empty().append('<option value="">-- Pilih Site --</option>');
-
-                if (!data || !data.length) {
-                    $site.append(
-                        '<option value="" disabled>Site belum tersedia untuk perusahaan ini</option>'
-                    );
-                } else {
-                    $.each(data, function(i, site) {
-                        $site.append('<option value="' + site.id_site + '">' + escapeHtml(site
-                            .nama_site) + '</option>');
-                    });
-                }
-
-                $site.prop('disabled', false);
-                setSelectValue($site, selectedSite || '');
-            }).fail(function() {
-                $site.html('<option value="">Site gagal dimuat</option>').prop('disabled', false)
-                    .trigger('change.select2');
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire('Error', 'Data site gagal dimuat', 'error');
-                }
-            });
+        function applyMarketingProjectSite($form, key, fallback) {
+            var data = marketingSiteData[key] || fallback || {};
+            $form.find('.js-marketing-key-hidden').val(key || '');
+            $form.find('.js-info-perusahaan').val(data.nama_client || data.nama_perusahaan || '');
+            $form.find('.js-info-marketing').val(data.marketing_name || '');
+            $form.find('.js-info-project').val(data.nama_project || '');
+            $form.find('.js-info-site').val(data.nama_site || '');
+            $form.find('.js-info-provinsi').val(data.nama_provinsi || '');
+            $form.find('.js-info-kota').val(data.nama_kota || '');
+            setDate($form.find('[name="tgl_mulai"]'), data.tgl_pelaksanaan || data.tgl_mulai || '');
+            setDate($form.find('[name="tgl_selesai"]'), data.tgl_selesai || '');
         }
 
         function korlapRow(row) {
@@ -496,10 +534,10 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
         }
 
         $(document)
-            .off('change.projectOffcanvas', '.project-form .js-perusahaan')
-            .on('change.projectOffcanvas', '.project-form .js-perusahaan', function() {
+            .off('change.projectOffcanvas', '.project-form .js-marketing-project-site')
+            .on('change.projectOffcanvas', '.project-form .js-marketing-project-site', function() {
                 var $form = $(this).closest('form');
-                loadSites($form, $(this).val(), '');
+                applyMarketingProjectSite($form, $(this).val(), {});
             });
 
         $(document)
@@ -556,9 +594,9 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
             function() {
                 var $form = $('#form-add-project');
                 $form[0].reset();
-                setSelectValue($form.find('.js-perusahaan'), '');
-                $form.find('.js-site').html('<option value="">-- Pilih Site --</option>').prop('disabled',
-                    false).trigger('change.select2');
+                $form.find('.js-marketing-project-site').prop('disabled', false);
+                setSelectValue($form.find('.js-marketing-project-site'), '');
+                applyMarketingProjectSite($form, '', {});
                 renderKorlap($form, [{}]);
                 initFlatpickr($form);
                 setDate($form.find('[name="tgl_mulai"]'), '');
@@ -573,9 +611,10 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
             $form[0].reset();
             $form.find('[name="kode_project"]').val(data.kode_project || '');
             $form.find('#edit_kode_project_display').val(data.kode_project || '');
-            $form.find('[name="nama_project"]').val(data.nama_project || '');
-            setSelectValue($form.find('[name="perusahaan_id"]'), data.perusahaan_id || '');
-            loadSites($form, data.perusahaan_id || '', data.site_id || '');
+            ensureMarketingOption($form.find('.js-marketing-project-site'), data.marketing_key || '', data);
+            $form.find('.js-marketing-project-site').prop('disabled', (data.source || '') === 'api_project_site');
+            setSelectValue($form.find('.js-marketing-project-site'), data.marketing_key || '');
+            applyMarketingProjectSite($form, data.marketing_key || '', data);
             setDate($form.find('[name="tgl_mulai"]'), data.tgl_mulai || '');
             setDate($form.find('[name="tgl_selesai"]'), data.tgl_selesai || '');
             $form.find('[name="deskripsi"]').val(data.deskripsi || '');

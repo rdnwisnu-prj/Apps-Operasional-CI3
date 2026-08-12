@@ -59,29 +59,37 @@ if (!empty($startDate) && !empty($endDate)) {
 
 $budgetPercentRaw = $grand_budget > 0 ? max(0, ($grand_expense / $grand_budget) * 100) : 0;
 $budgetPercent = min(100, $budgetPercentRaw);
-$processCount = count($process_finance);
-$processCardClass = $processCount === 1 ? 'col-md-12' : ($processCount === 3 ? 'col-md-4' : 'col-md-3');
-
-$operationalTabs = [];
+$processTabs = [];
 foreach ($process_finance as $processKey => $processRow) {
+    $processTabs[$processKey] = [
+        'label' => $processRow['label'] ?? '-',
+        'rows' => [],
+        'total' => (float) ($processRow['total'] ?? 0),
+        'count' => 0,
+        'initial_budget' => (float) ($processRow['initial_budget'] ?? 0),
+        'topup' => (float) ($processRow['topup'] ?? 0),
+        'budget' => (float) ($processRow['budget'] ?? 0),
+        'remaining' => (float) ($processRow['remaining'] ?? 0),
+        'categories' => [],
+    ];
+
     foreach (($processRow['categories'] ?? []) as $categoryKey => $category) {
-        if (!isset($operationalTabs[$categoryKey])) {
-            $operationalTabs[$categoryKey] = [
-                'label' => $category['label'] ?? ucfirst($categoryKey),
-                'rows' => [],
-                'total' => 0,
-                'count' => 0,
-            ];
-        }
-
+        $categoryRows = [];
         foreach (($category['rows'] ?? []) as $expense) {
-            $expense['process_label'] = $processRow['label'] ?? '-';
+            $expense['category_label'] = $category['label'] ?? ucfirst($categoryKey);
+            $expense['category_key'] = $categoryKey;
             $expense['process_key'] = $processKey;
-            $operationalTabs[$categoryKey]['rows'][] = $expense;
+            $processTabs[$processKey]['rows'][] = $expense;
+            $categoryRows[] = $expense;
         }
 
-        $operationalTabs[$categoryKey]['total'] += (float) ($category['total'] ?? 0);
-        $operationalTabs[$categoryKey]['count'] += (int) ($category['count'] ?? 0);
+        $processTabs[$processKey]['count'] += (int) ($category['count'] ?? 0);
+        $processTabs[$processKey]['categories'][$categoryKey] = [
+            'label' => $category['label'] ?? ucfirst($categoryKey),
+            'rows' => $categoryRows,
+            'total' => (float) ($category['total'] ?? 0),
+            'count' => (int) ($category['count'] ?? 0),
+        ];
     }
 }
 ?>
@@ -151,6 +159,52 @@ foreach ($process_finance as $processKey => $processRow) {
 
 .project-expense-table .item-meta {
     font-size: 12px;
+}
+
+.project-process-tabs {
+    gap: 12px;
+}
+
+.project-process-tabs .nav-item {
+    flex: 1 1 240px;
+}
+
+.project-process-tabs .nav-link {
+    width: 100%;
+    color: var(--bs-body-color);
+    border: 0;
+    border-radius: 8px;
+    padding: 0;
+    background: transparent;
+    text-align: left;
+}
+
+.project-process-tabs .nav-link.active,
+.project-process-tabs .nav-link:hover {
+    background: transparent;
+    color: var(--bs-body-color);
+}
+
+.project-process-tabs .nav-link.active .project-process-summary {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 1px rgba(var(--bs-primary-rgb), .18);
+}
+
+.project-operational-tabs {
+    gap: 8px;
+}
+
+.project-operational-tabs .nav-link {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+    color: var(--bs-body-color);
+    padding: 10px 12px;
+}
+
+.project-operational-tabs .nav-link.active {
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), .08);
+    color: var(--bs-primary);
 }
 
 @media (max-width: 767.98px) {
@@ -250,55 +304,62 @@ foreach ($process_finance as $processKey => $processRow) {
             </div>
         </div>
 
-        <div class="row g-3 mb-4">
-            <?php foreach ($process_finance as $process => $row): ?>
+        <ul class="nav project-process-tabs mb-4" role="tablist">
+            <?php $processTabIndex = 0; ?>
+            <?php foreach ($processTabs as $process => $row): ?>
             <?php
+                    $processTabIndex++;
                     $processBudget = (float) ($row['budget'] ?? 0);
                     $processInitialBudget = (float) ($row['initial_budget'] ?? 0);
                     $processTopup = (float) ($row['topup'] ?? 0);
                     $processExpense = (float) ($row['total'] ?? 0);
                     $processRemaining = (float) ($row['remaining'] ?? 0);
                     $processPercent = $processBudget > 0 ? min(100, max(0, ($processExpense / $processBudget) * 100)) : 0;
+                    $processPaneId = 'project-process-' . preg_replace('/[^a-zA-Z0-9_-]/', '-', (string) $process);
                     ?>
-            <div class="<?= $processCardClass; ?>">
-                <div class="project-process-summary">
-                    <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
-                        <div>
-                            <span class="badge bg-primary-subtle text-primary mb-2">Proses
-                                <?= html_escape($process); ?></span>
-                            <h6 class="mb-0"><?= html_escape($row['label']); ?></h6>
+            <li class="nav-item" role="presentation">
+                <a href="#<?= html_escape($processPaneId); ?>"
+                    class="nav-link <?= $processTabIndex === 1 ? 'active' : ''; ?>" data-bs-toggle="tab" role="tab"
+                    aria-selected="<?= $processTabIndex === 1 ? 'true' : 'false'; ?>">
+                    <div class="project-process-summary">
+                        <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
+                            <div>
+                                <span class="badge bg-primary-subtle text-primary mb-2">Proses
+                                    <?= html_escape($process); ?></span>
+                                <h6 class="mb-0"><?= html_escape($row['label']); ?></h6>
+                            </div>
+                            <i class="ti ti-activity fs-22 text-muted"></i>
                         </div>
-                        <i class="ti ti-activity fs-22 text-muted"></i>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Budget Awal</span>
+                            <span class="fw-semibold"><?= project_detail_money($processInitialBudget); ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Top Up</span>
+                            <span class="fw-semibold"><?= project_detail_money($processTopup); ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Saldo</span>
+                            <span class="fw-semibold"><?= project_detail_money($processBudget); ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Pengeluaran</span>
+                            <span class="fw-semibold"><?= project_detail_money($processExpense); ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Sisa</span>
+                            <span
+                                class="fw-semibold <?= $processRemaining < 0 ? 'text-danger' : 'text-success'; ?>"><?= project_detail_money($processRemaining); ?></span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar <?= $processRemaining < 0 ? 'bg-danger' : 'bg-success'; ?>"
+                                role="progressbar" style="width: <?= $processPercent; ?>%;"></div>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted">Budget Awal</span>
-                        <span class="fw-semibold"><?= project_detail_money($processInitialBudget); ?></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted">Top Up</span>
-                        <span class="fw-semibold"><?= project_detail_money($processTopup); ?></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted">Saldo</span>
-                        <span class="fw-semibold"><?= project_detail_money($processBudget); ?></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted">Pengeluaran</span>
-                        <span class="fw-semibold"><?= project_detail_money($processExpense); ?></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Sisa</span>
-                        <span
-                            class="fw-semibold <?= $processRemaining < 0 ? 'text-danger' : 'text-success'; ?>"><?= project_detail_money($processRemaining); ?></span>
-                    </div>
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar <?= $processRemaining < 0 ? 'bg-danger' : 'bg-success'; ?>"
-                            role="progressbar" style="width: <?= $processPercent; ?>%;"></div>
-                    </div>
-                </div>
-            </div>
+                </a>
+            </li>
             <?php endforeach; ?>
-        </div>
+        </ul>
 
         <div class="row g-4">
             <div class="col-xl-3">
@@ -376,91 +437,124 @@ foreach ($process_finance as $processKey => $processRow) {
                         class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between gap-2 flex-wrap">
                         <div>
                             <h5 class="card-title mb-0">Detail Pengeluaran Operasional</h5>
-                            <small class="text-muted">Data dipisah per operasional untuk tampilan
+                            <small class="text-muted">Data dipisah per proses untuk tampilan
                                 <?= html_escape($financial_scope); ?>.</small>
                         </div>
                     </div>
                     <div class="card-body">
-                        <ul class="nav nav-tabs nav-bordered border-0 mb-3" role="tablist">
-                            <?php $tabIndex = 0; ?>
-                            <?php foreach ($operationalTabs as $categoryKey => $tab): ?>
-                            <?php $tabIndex++; ?>
-                            <li class="nav-item" role="presentation">
-                                <a href="#project-expense-<?= html_escape($categoryKey); ?>" data-bs-toggle="tab"
-                                    class="nav-link border-3 <?= $tabIndex === 1 ? 'active' : ''; ?>"
-                                    aria-selected="<?= $tabIndex === 1 ? 'true' : 'false'; ?>" role="tab">
-                                    <?= html_escape($tab['label']); ?>
-                                    <span
-                                        class="badge bg-secondary-subtle text-secondary ms-1"><?= project_detail_number($tab['count']); ?></span>
-                                </a>
-                            </li>
-                            <?php endforeach; ?>
-                        </ul>
-
                         <div class="tab-content">
                             <?php $paneIndex = 0; ?>
-                            <?php foreach ($operationalTabs as $categoryKey => $tab): ?>
-                            <?php $paneIndex++; ?>
+                            <?php foreach ($processTabs as $process => $tab): ?>
+                            <?php
+                                    $paneIndex++;
+                                    $processPaneId = 'project-process-' . preg_replace('/[^a-zA-Z0-9_-]/', '-', (string) $process);
+                                    ?>
                             <div class="tab-pane fade <?= $paneIndex === 1 ? 'show active' : ''; ?>"
-                                id="project-expense-<?= html_escape($categoryKey); ?>" role="tabpanel">
+                                id="<?= html_escape($processPaneId); ?>" role="tabpanel">
                                 <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
                                     <h6 class="mb-0"><?= html_escape($tab['label']); ?></h6>
-                                    <span class="badge bg-success-subtle text-success">Total
-                                        <?= project_detail_money($tab['total']); ?></span>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span
+                                            class="badge bg-secondary-subtle text-secondary"><?= project_detail_number($tab['count']); ?>
+                                            data</span>
+                                        <span class="badge bg-success-subtle text-success">Total
+                                            <?= project_detail_money($tab['total']); ?></span>
+                                    </div>
                                 </div>
 
-                                <?php if (!empty($tab['rows'])): ?>
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle project-expense-table mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 14%;">Proses</th>
-                                                <th style="width: 14%;">Tanggal</th>
-                                                <th>Detail</th>
-                                                <th class="text-end" style="width: 10%;">Qty</th>
-                                                <th class="text-end" style="width: 14%;">Nominal</th>
-                                                <th class="text-end" style="width: 14%;">Total</th>
-                                                <th style="width: 12%;">Input Oleh</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($tab['rows'] as $expense): ?>
-                                            <tr>
-                                                <td><span
-                                                        class="badge bg-primary-subtle text-primary"><?= html_escape($expense['process_label'] ?? '-'); ?></span>
-                                                </td>
-                                                <td><?= project_detail_date_range($expense['date_start'] ?? null, $expense['date_end'] ?? null); ?>
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        class="fw-semibold d-block"><?= html_escape($expense['item_name'] ?? '-'); ?></span>
-                                                    <?php if (!empty($expense['item_meta'])): ?>
-                                                    <span
-                                                        class="text-muted item-meta d-block"><?= html_escape($expense['item_meta']); ?></span>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($expense['keterangan'])): ?>
-                                                    <span
-                                                        class="text-muted item-meta d-block"><?= html_escape($expense['keterangan']); ?></span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td class="text-end">
-                                                    <?= project_detail_number($expense['quantity'] ?? null); ?>
-                                                </td>
-                                                <td class="text-end">
-                                                    <?= $expense['unit_price'] === null ? '-' : project_detail_money($expense['unit_price']); ?>
-                                                </td>
-                                                <td class="text-end fw-semibold">
-                                                    <?= $expense['amount'] === null ? '-' : project_detail_money($expense['amount']); ?>
-                                                </td>
-                                                <td><?= html_escape($expense['created_by'] ?? '-'); ?></td>
-                                            </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                                <?php if (!empty($tab['categories'])): ?>
+                                <ul class="nav project-operational-tabs mb-3" role="tablist">
+                                    <?php $categoryTabIndex = 0; ?>
+                                    <?php foreach ($tab['categories'] as $categoryKey => $category): ?>
+                                    <?php
+                                                $categoryTabIndex++;
+                                                $categoryPaneId = $processPaneId . '-category-' . preg_replace('/[^a-zA-Z0-9_-]/', '-', (string) $categoryKey);
+                                                ?>
+                                    <li class="nav-item" role="presentation">
+                                        <a href="#<?= html_escape($categoryPaneId); ?>"
+                                            class="nav-link <?= $categoryTabIndex === 1 ? 'active' : ''; ?>"
+                                            data-bs-toggle="tab" role="tab"
+                                            aria-selected="<?= $categoryTabIndex === 1 ? 'true' : 'false'; ?>">
+                                            <span class="fw-semibold"><?= html_escape($category['label']); ?></span>
+                                            <span
+                                                class="badge bg-secondary-subtle text-secondary ms-1"><?= project_detail_number($category['count']); ?></span>
+                                        </a>
+                                    </li>
+                                    <?php endforeach; ?>
+                                </ul>
+
+                                <div class="tab-content">
+                                    <?php $categoryPaneIndex = 0; ?>
+                                    <?php foreach ($tab['categories'] as $categoryKey => $category): ?>
+                                    <?php
+                                                $categoryPaneIndex++;
+                                                $categoryPaneId = $processPaneId . '-category-' . preg_replace('/[^a-zA-Z0-9_-]/', '-', (string) $categoryKey);
+                                                ?>
+                                    <div class="tab-pane fade <?= $categoryPaneIndex === 1 ? 'show active' : ''; ?>"
+                                        id="<?= html_escape($categoryPaneId); ?>" role="tabpanel">
+                                        <div
+                                            class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+                                            <h6 class="mb-0"><?= html_escape($category['label']); ?></h6>
+                                            <span class="badge bg-success-subtle text-success">Total
+                                                <?= project_detail_money($category['total']); ?></span>
+                                        </div>
+
+                                        <?php if (!empty($category['rows'])): ?>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle project-expense-table mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 16%;">Tanggal</th>
+                                                        <th>Detail</th>
+                                                        <th class="text-end" style="width: 10%;">Qty</th>
+                                                        <th class="text-end" style="width: 14%;">Nominal</th>
+                                                        <th class="text-end" style="width: 14%;">Total</th>
+                                                        <th style="width: 14%;">Input Oleh</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($category['rows'] as $expense): ?>
+                                                    <tr>
+                                                        <td><?= project_detail_date_range($expense['date_start'] ?? null, $expense['date_end'] ?? null); ?>
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                class="fw-semibold d-block"><?= html_escape($expense['item_name'] ?? '-'); ?></span>
+                                                            <?php if (!empty($expense['item_meta'])): ?>
+                                                            <span
+                                                                class="text-muted item-meta d-block"><?= html_escape($expense['item_meta']); ?></span>
+                                                            <?php endif; ?>
+                                                            <?php if (!empty($expense['keterangan'])): ?>
+                                                            <span
+                                                                class="text-muted item-meta d-block"><?= html_escape($expense['keterangan']); ?></span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <?= project_detail_number($expense['quantity'] ?? null); ?>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <?= $expense['unit_price'] === null ? '-' : project_detail_money($expense['unit_price']); ?>
+                                                        </td>
+                                                        <td class="text-end fw-semibold">
+                                                            <?= $expense['amount'] === null ? '-' : project_detail_money($expense['amount']); ?>
+                                                        </td>
+                                                        <td><?= html_escape($expense['created_by'] ?? '-'); ?></td>
+                                                    </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <?php else: ?>
+                                        <div class="border rounded p-3 text-muted">Belum ada pengeluaran
+                                            <?= html_escape($category['label']); ?> pada proses
+                                            <?= html_escape($tab['label']); ?>.</div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
                                 <?php else: ?>
                                 <div class="border rounded p-3 text-muted">Belum ada pengeluaran
-                                    <?= html_escape($tab['label']); ?>.</div>
+                                    pada proses <?= html_escape($tab['label']); ?>.</div>
                                 <?php endif; ?>
                             </div>
                             <?php endforeach; ?>

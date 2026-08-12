@@ -71,6 +71,301 @@ class Marketing_api
         return false;
     }
 
+    public function getProjectSites($filters = [])
+    {
+        $query = [];
+        foreach (['client_id', 'project_id', 'q'] as $key) {
+            if (isset($filters[$key]) && $filters[$key] !== '') {
+                $query[$key] = $filters[$key];
+            }
+        }
+
+        $suffix = '/project_sites' . (!empty($query) ? '?' . http_build_query($query) : '');
+        $response = $this->_request($this->api_base_url . $suffix);
+
+        if ($this->hasProjectSitePayload($response)) {
+            return $response['data'];
+        }
+
+        return false;
+    }
+
+    private function hasProjectSitePayload($response)
+    {
+        if (!$response || !isset($response['status'], $response['data']) || $response['status'] !== true || !is_array($response['data'])) {
+            return false;
+        }
+
+        if (empty($response['data'])) {
+            return true;
+        }
+
+        $first = reset($response['data']);
+        if (!is_array($first)) {
+            return false;
+        }
+
+        return !empty($first['marketing_site_id'])
+            && !empty($first['marketing_project_id'])
+            && isset($first['nama_site']) && $first['nama_site'] !== '';
+    }
+
+    public function getProjectSiteByKey($marketingProjectId, $marketingSiteId)
+    {
+        $rows = $this->getProjectSites(['project_id' => (int) $marketingProjectId]);
+
+        if (!is_array($rows)) {
+            return false;
+        }
+
+        foreach ($rows as $row) {
+            if ((int) ($row['marketing_project_id'] ?? 0) === (int) $marketingProjectId
+                && (int) ($row['marketing_site_id'] ?? 0) === (int) $marketingSiteId) {
+                return $row;
+            }
+        }
+
+        return false;
+    }
+
+    public function syncProjectSiteByKey($marketingProjectId, $marketingSiteId, $options = [])
+    {
+        $row = $this->getProjectSiteByKey($marketingProjectId, $marketingSiteId);
+
+        if (!$row) {
+            return ['success' => false, 'message' => 'Data project/site marketing tidak ditemukan'];
+        }
+
+        $this->CI->load->model('Perusahaan_model', 'perusahaan');
+        $this->CI->load->model('Project_model', 'project');
+
+        $perusahaan = $this->upsertPerusahaanFromProjectSite($row);
+        if (!$perusahaan) {
+            return ['success' => false, 'message' => 'Data perusahaan gagal diproses'];
+        }
+
+        $site = $this->upsertSiteFromProjectSite($row, $perusahaan['id_perusahaan']);
+        if (!$site) {
+            return ['success' => false, 'message' => 'Data site gagal diproses'];
+        }
+
+        $project = $this->upsertProjectFromProjectSite(
+            $row,
+            $perusahaan['id_perusahaan'],
+            $site['id_site'],
+            $options['kode_project'] ?? null,
+            $options['deskripsi'] ?? null
+        );
+
+        if (!$project) {
+            return ['success' => false, 'message' => 'Data project gagal diproses'];
+        }
+
+        return [
+            'success' => true,
+            'message' => $project['action'] === 'inserted' ? 'Data project berhasil ditambahkan' : 'Data project berhasil diperbarui',
+            'project' => $project,
+            'site' => $site,
+            'perusahaan' => $perusahaan,
+            'source' => $row,
+        ];
+    }
+
+    public function syncProjectSites()
+    {
+        $projectSites = $this->getProjectSites();
+
+        if ($projectSites === false) {
+            return ['success' => false, 'message' => 'Gagal mengambil data project site dari Marketing API'];
+        }
+
+        $this->CI->load->model('Perusahaan_model', 'perusahaan');
+        $this->CI->load->model('Project_model', 'project');
+
+        $insertedProjects = 0;
+        $updatedProjects = 0;
+        $insertedSites = 0;
+        $updatedSites = 0;
+        $insertedCompanies = 0;
+        $updatedCompanies = 0;
+        $skipped = 0;
+
+        $this->CI->db->trans_start();
+
+        foreach ($projectSites as $row) {
+            if (empty($row['client_id']) || empty($row['marketing_site_id']) || empty($row['marketing_project_id'])) {
+                $skipped++;
+                continue;
+            }
+
+            $perusahaan = $this->upsertPerusahaanFromProjectSite($row);
+            if (!$perusahaan) {
+                $skipped++;
+                continue;
+            }
+            $insertedCompanies += $perusahaan['action'] === 'inserted' ? 1 : 0;
+            $updatedCompanies += $perusahaan['action'] === 'updated' ? 1 : 0;
+
+            $site = $this->upsertSiteFromProjectSite($row, $perusahaan['id_perusahaan']);
+            if (!$site) {
+                $skipped++;
+                continue;
+            }
+            $insertedSites += $site['action'] === 'inserted' ? 1 : 0;
+            $updatedSites += $site['action'] === 'updated' ? 1 : 0;
+
+            $project = $this->upsertProjectFromProjectSite($row, $perusahaan['id_perusahaan'], $site['id_site']);
+            if (!$project) {
+                $skipped++;
+                continue;
+            }
+            $insertedProjects += $project['action'] === 'inserted' ? 1 : 0;
+            $updatedProjects += $project['action'] === 'updated' ? 1 : 0;
+        }
+
+        $this->CI->db->trans_complete();
+
+        if (!$this->CI->db->trans_status()) {
+            return ['success' => false, 'message' => 'Sinkronisasi project site gagal disimpan'];
+        }
+
+        return [
+            'success' => true,
+            'message' => "Sinkronisasi selesai. Project ditambahkan: $insertedProjects, project diperbarui: $updatedProjects, site ditambahkan: $insertedSites, site diperbarui: $updatedSites",
+            'total' => count($projectSites),
+            'inserted_projects' => $insertedProjects,
+            'updated_projects' => $updatedProjects,
+            'inserted_sites' => $insertedSites,
+            'updated_sites' => $updatedSites,
+            'inserted_companies' => $insertedCompanies,
+            'updated_companies' => $updatedCompanies,
+            'skipped' => $skipped,
+        ];
+    }
+
+    private function upsertPerusahaanFromProjectSite($row)
+    {
+        $clientId = (int) $row['client_id'];
+        $existing = $this->CI->perusahaan->getByClientId($clientId);
+        $now = date('Y-m-d H:i:s');
+
+        $data = [
+            'nama_perusahaan' => $row['nama_client'] ?: 'Client #' . $clientId,
+            'alamat_perusahaan' => $row['alamat_client'] ?: '',
+            'nama_pic' => $row['nama_pic'] ?: '',
+            'tlp_pic' => $row['tlp_pic'] ?: '',
+            'no_tlp' => $row['tlp_pic'] ?: '',
+            'email' => $row['email_pic'] ?: null,
+            'marketing_id' => (int) ($row['user_id'] ?? 0),
+            'marketing_name' => $row['marketing_name'] ?: '',
+            'source' => 'api_project_site',
+            'client_id' => $clientId,
+            'updated_at' => $now,
+        ];
+
+        if ($existing) {
+            $this->CI->perusahaan->editData($existing['id_perusahaan'], $data);
+            return ['id_perusahaan' => (int) $existing['id_perusahaan'], 'action' => 'updated'];
+        }
+
+        $data['created_at'] = $now;
+        $this->CI->perusahaan->storeData($data);
+        return ['id_perusahaan' => (int) $this->CI->db->insert_id(), 'action' => 'inserted'];
+    }
+
+    private function upsertSiteFromProjectSite($row, $id_perusahaan)
+    {
+        $marketingSiteId = (int) $row['marketing_site_id'];
+        $existing = $this->CI->project->getSiteByMarketingSiteId($marketingSiteId);
+        if (!$existing) {
+            $existing = $this->CI->project->getSiteByPerusahaanAndName($id_perusahaan, $row['nama_site']);
+        }
+        $now = date('Y-m-d H:i:s');
+
+        $data = [
+            'id_perusahaan' => (int) $id_perusahaan,
+            'nama_site' => $row['nama_site'] ?: 'Site #' . $marketingSiteId,
+            'provinsi' => $row['provinsi_id'] ?: null,
+            'kota' => $row['kota_id'] ?: null,
+            'keterangan' => $row['nama_provinsi'] || $row['nama_kota']
+                ? trim(($row['nama_provinsi'] ?: '') . ' ' . ($row['nama_kota'] ?: ''))
+                : '',
+            'marketing_site_id' => $marketingSiteId,
+            'client_id' => (int) $row['client_id'],
+            'source' => 'api_project_site',
+            'updated_at' => $now,
+        ];
+        $data = $this->filterExistingFields('tab_site', $data);
+
+        if ($existing) {
+            $this->CI->project->updateSiteData($existing['id_site'], $data);
+            return ['id_site' => (int) $existing['id_site'], 'action' => 'updated'];
+        }
+
+        $data['created_at'] = $now;
+        $this->CI->project->storeSiteData($data);
+        return ['id_site' => (int) $this->CI->db->insert_id(), 'action' => 'inserted'];
+    }
+
+    private function upsertProjectFromProjectSite($row, $id_perusahaan, $id_site, $kode_project = null, $deskripsi_override = null)
+    {
+        $marketingProjectId = (int) $row['marketing_project_id'];
+        $marketingSiteId = (int) $row['marketing_site_id'];
+        $existing = $kode_project ? $this->CI->project->getProjectById($kode_project) : null;
+        if (!$existing) {
+            $existing = $this->CI->project->getProjectByMarketingSite($marketingProjectId, $marketingSiteId);
+        }
+        if (!$existing) {
+            $existing = $this->CI->project->getProjectBySiteAndName($id_site, $row['nama_project']);
+        }
+        $now = date('Y-m-d H:i:s');
+        $tglMulai = $row['tgl_pelaksanaan'] ?: null;
+        $tglSelesai = $row['tgl_selesai'] ?: $tglMulai;
+
+        if (!$tglMulai || !$tglSelesai) {
+            return false;
+        }
+
+        $data = [
+            'perusahaan_id' => (int) $id_perusahaan,
+            'site_id' => (int) $id_site,
+            'nama_project' => $row['nama_project'] ?: 'Project #' . $marketingProjectId,
+            'tgl_mulai' => $tglMulai,
+            'tgl_selesai' => $tglSelesai,
+            'deskripsi' => $deskripsi_override !== null ? $deskripsi_override : ($row['deskripsi'] ?: ($row['keterangan'] ?: '')),
+            'marketing_project_id' => $marketingProjectId,
+            'marketing_site_id' => $marketingSiteId,
+            'source' => 'api_project_site',
+            'updated_at' => $now,
+        ];
+        $data = $this->filterExistingFields('tab_project', $data);
+
+        if ($existing) {
+            $this->CI->project->editData($existing['kode_project'], $data);
+            return ['kode_project' => $existing['kode_project'], 'action' => 'updated'];
+        }
+
+        $data['kode_project'] = $this->CI->project->generateKode();
+        $data['user_id'] = (int) $this->CI->session->userdata('id_user');
+        $data['created_at'] = $now;
+        $data = $this->filterExistingFields('tab_project', $data);
+        $this->CI->project->storeData($data);
+
+        return ['kode_project' => $data['kode_project'], 'action' => 'inserted'];
+    }
+
+    private function filterExistingFields($table, $data)
+    {
+        $filtered = [];
+        foreach ($data as $field => $value) {
+            if ($this->CI->db->field_exists($field, $table)) {
+                $filtered[$field] = $value;
+            }
+        }
+
+        return $filtered;
+    }
+
     /**
      * Sinkronisasi semua client dari Marketing ke tab_perusahaan
      * @return array result summary

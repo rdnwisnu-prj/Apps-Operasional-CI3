@@ -1,4 +1,6 @@
 <?php
+$baseRoute = $base_route ?? 'FeeDokter';
+$pageLabel = $page_label ?? 'Fee Dokter';
 $selectedDokter = [];
 if (is_array($f_dokter)) {
     $selectedDokter = array_map('intval', $f_dokter);
@@ -45,7 +47,7 @@ $namaBulan = [
         <!-- UI Filter -->
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <form action="<?= base_url('FeeDokter/filter'); ?>" id="form-filter"
+                <form action="<?= base_url($baseRoute . '/filter'); ?>" id="form-filter"
                     class="d-flex align-items-center gap-2 flex-wrap">
                     <div class="dropdown">
                         <a href="javascript:void(0);" class="btn btn-outline-light shadow px-2"
@@ -53,7 +55,7 @@ $namaBulan = [
                                 class="ti ti-filter me-2"></i>Filter<i class="ti ti-chevron-down ms-2"></i></a>
                         <div class="filter-dropdown-menu dropdown-menu dropdown-menu-lg p-0">
                             <div class="filter-header d-flex align-items-center justify-content-between border-bottom">
-                                <h6 class="mb-0"><i class="ti ti-filter me-1"></i>Filter Fee Dokter</h6>
+                                <h6 class="mb-0"><i class="ti ti-filter me-1"></i>Filter <?= html_escape($pageLabel); ?></h6>
                                 <button type="button" class="btn-close close-filter-btn" aria-label="Close"></button>
                             </div>
                             <div class="filter-set-view p-3">
@@ -203,7 +205,7 @@ $namaBulan = [
                 <button type="button" class="btn btn-success" id="btn-export">
                     <i class="ti ti-file-spreadsheet me-1"></i>Export Excel
                 </button>
-                <a href="<?= base_url('FeeDokter/Store'); ?>" class="btn btn-primary">
+                <a href="<?= base_url($baseRoute . '/Store'); ?>" class="btn btn-primary">
                     <i class="ti ti-square-rounded-plus-filled me-1"></i>Tambah Data
                 </a>
             </div>
@@ -248,7 +250,7 @@ $namaBulan = [
                                 <?php endif; ?>
                             </td>
                             <td class="text-end">Rp <?= number_format($f['total'], 0, ',', '.'); ?></td>
-                            <td><?= html_escape($f['keterangan'] ?: ($f['nama_project'] ?? $f['project'])); ?></td>
+                            <td><?= html_escape($f['keterangan'] ?: ($f['nama_project'] ?? $f['project'] ?? '-')); ?></td>
                             <td class="text-center">
                                 <?= !empty($f['tgl_project']) ? tanggal_indonesia_medium(date($f['tgl_project'])) : '-'; ?>
                             </td>
@@ -286,13 +288,13 @@ $namaBulan = [
                                     <ul class="dropdown-menu dropdown-menu-right">
                                         <li>
                                             <a class="dropdown-item"
-                                                href="<?= base_url('FeeDokter/edit/' . $f['id_fee']); ?>">
+                                                href="<?= base_url($baseRoute . '/edit/' . $f['id_fee']); ?>">
                                                 <i class="ri-pencil-line align-bottom me-2 text-muted"></i>Edit
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item btn-destroy"
-                                                href="<?= base_url('FeeDokter/destroy/' . $f['id_fee']); ?>">
+                                                href="<?= base_url($baseRoute . '/destroy/' . $f['id_fee']); ?>">
                                                 <i class="ri-delete-bin-line align-bottom me-2 text-muted"></i>Delete
                                             </a>
                                         </li>
@@ -364,7 +366,7 @@ $namaBulan = [
                         next: '<i class="ti ti-arrow-right"></i>',
                         previous: '<i class="ti ti-arrow-left"></i> ',
                     },
-                    emptyTable: 'Tidak ada data fee dokter',
+                    emptyTable: 'Tidak ada data <?= strtolower(html_escape($pageLabel)); ?>',
                     zeroRecords: 'Data tidak ditemukan',
                 },
                 responsive: true,
@@ -409,7 +411,7 @@ $namaBulan = [
                     refreshTooltips();
                 },
                 error: function() {
-                    Swal.fire('Error', 'Filter data Fee Dokter gagal diproses', 'error');
+                    Swal.fire('Error', 'Filter data <?= html_escape($pageLabel); ?> gagal diproses', 'error');
                 },
                 complete: function() {
                     $button.prop('disabled', false).html(originalHtml);
@@ -433,12 +435,12 @@ $namaBulan = [
             getFeeDokterTable().search('').draw();
             syncDoctorCheckAll();
             applyFilter();
-            window.history.replaceState({}, document.title, base_url + 'FeeDokter');
+            window.history.replaceState({}, document.title, base_url + '<?= $baseRoute; ?>');
         });
 
         $('#btn-export').on('click', function() {
             var params = $('#form-filter').serialize();
-            window.location.href = base_url + 'FeeDokter/export' + (params ? '?' + params : '');
+            window.location.href = base_url + '<?= $baseRoute; ?>/export' + (params ? '?' + params : '');
         });
 
         syncDoctorCheckAll();
