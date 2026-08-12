@@ -10,6 +10,7 @@ application/sessions/*
 
 # Konfigurasi rahasia
 application/config/database.php
+application/config/config.php
 
 # File environment
 .env
