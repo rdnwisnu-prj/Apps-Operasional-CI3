@@ -57,7 +57,7 @@ jobs:
           set net:max-retries 2
           set net:timeout 30
 
-          mirror --reverse --dry-run --verbose \
+          mirror --reverse --verbose --parallel=2 \
             --exclude-glob=.git/** \
             --exclude-glob=.github/** \
             --exclude-glob=.gitignore \
