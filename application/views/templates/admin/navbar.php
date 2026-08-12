@@ -5,15 +5,15 @@
             <div class="topbar-menu d-flex align-items-center gap-1">
                 <div class="logo-box">
                     <a href="index.html" class="logo-light">
-                        <img src="<?= base_url()?>vendor/template/ubold/assets/images/logo-light.png" alt="logo"
+                        <img src="<?= base_url()?>assets/template/ubold/assets/images/logo-light.png" alt="logo"
                             class="logo-lg">
-                        <img src="<?= base_url()?>vendor/template/ubold/assets/images/logo-sm.png" alt="small logo"
+                        <img src="<?= base_url()?>assets/template/ubold/assets/images/logo-sm.png" alt="small logo"
                             class="logo-sm">
                     </a>
                     <a href="index.html" class="logo-dark">
-                        <img src="<?= base_url()?>vendor/template/ubold/assets/images/logo-dark.png" alt="dark logo"
+                        <img src="<?= base_url()?>assets/template/ubold/assets/images/logo-dark.png" alt="dark logo"
                             class="logo-lg">
-                        <img src="<?= base_url()?>vendor/template/ubold/assets/images/logo-sm.png" alt="small logo"
+                        <img src="<?= base_url()?>assets/template/ubold/assets/images/logo-sm.png" alt="small logo"
                             class="logo-sm">
                     </a>
                 </div>
@@ -35,7 +35,7 @@
                 <li class="dropdown">
                     <a class="nav-link dropdown-toggle nav-user me-0 waves-effect waves-light" data-bs-toggle="dropdown"
                         href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                        <img src="<?= base_url()?>vendor/template/ubold/assets/images/users/user-1.jpg" alt="user-image"
+                        <img src="<?= base_url()?>assets/template/ubold/assets/images/users/user-1.jpg" alt="user-image"
                             class="rounded-circle">
                         <span class="ms-1 d-none d-md-inline-block">
                             Geneva <i class="mdi mdi-chevron-down"></i>

@@ -9,10 +9,10 @@
 
     <link rel="shortcut icon" href="<?= base_url() ?>assets/img/logo/favicon.png">
     <link rel="stylesheet" href="<?= base_url() ?>assets/libs/sweetalert2/sweetalert2.min.css">
-    <link rel="stylesheet" href="<?= base_url() ?>vendor/template/crms/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?= base_url() ?>assets/template/crms/assets/css/bootstrap.min.css">
     <link rel="stylesheet"
-        href="<?= base_url() ?>vendor/template/crms/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="<?= base_url() ?>vendor/template/crms/assets/css/style.css" id="app-style">
+        href="<?= base_url() ?>assets/template/crms/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="<?= base_url() ?>assets/template/crms/assets/css/style.css" id="app-style">
     <link rel="stylesheet" href="<?= base_url() ?>assets/css/style.css">
     <link rel="stylesheet" href="<?= base_url() ?>assets/css/login.css">
 </head>
@@ -115,8 +115,8 @@
     </main>
 
     <script src="<?= base_url() ?>assets/vendor/jquery.min.js"></script>
-    <script src="<?= base_url() ?>vendor/template/crms/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= base_url() ?>vendor/template/crms/assets/js/script.js"></script>
+    <script src="<?= base_url() ?>assets/template/crms/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= base_url() ?>assets/template/crms/assets/js/script.js"></script>
     <script src="<?= base_url() ?>assets/libs/sweetalert2/sweetalert2.min.js"></script>
     <script src="<?= base_url() ?>assets/js/login.js"></script>
     <script src="<?= base_url() ?>assets/js/proses.js"></script>

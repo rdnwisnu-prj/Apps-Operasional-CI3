@@ -22,16 +22,16 @@
     <link rel="shortcut icon" href="<?= base_url()?>assets/img/logo/favicon.ico">
 
     <!-- Apple Icon -->
-    <link rel="apple-touch-icon" href="<?= base_url()?>vendor/template/crms/assets/img/apple-icon.png">
+    <link rel="apple-touch-icon" href="<?= base_url()?>assets/template/crms/assets/img/apple-icon.png">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/css/bootstrap.min.css">
 
     <!-- Tabler Icon CSS -->
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/plugins/tabler-icons/tabler-icons.min.css">
 
     <!-- Main CSS -->
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/css/style.css" id="app-style">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/css/style.css" id="app-style">
 
 </head>
 
@@ -50,7 +50,7 @@
                 <div class="col-md-8 d-flex align-items-center justify-content-center mx-auto">
                     <div>
                         <div class="error-img mb-4">
-                            <img src="<?= base_url()?>vendor/template/crms/assets/img/authentication/maintenance-img.png"
+                            <img src="<?= base_url()?>assets/template/crms/assets/img/authentication/maintenance-img.png"
                                 class="img-fluid" alt="Img">
                         </div>
                         <div class="text-center">
@@ -71,15 +71,15 @@
     <!-- End Wrapper -->
 
     <!-- jQuery -->
-    <script src="<?= base_url()?>vendor/template/crms/assets/js/jquery-3.7.1.min.js"
+    <script src="<?= base_url()?>assets/template/crms/assets/js/jquery-3.7.1.min.js"
         type="73a48659308a20cc46ca82f1-text/javascript"></script>
 
     <!-- Bootstrap Core JS -->
-    <script src="<?= base_url()?>vendor/template/crms/assets/js/bootstrap.bundle.min.js"
+    <script src="<?= base_url()?>assets/template/crms/assets/js/bootstrap.bundle.min.js"
         type="73a48659308a20cc46ca82f1-text/javascript"></script>
 
     <!-- Main JS -->
-    <script src="<?= base_url()?>vendor/template/crms/assets/js/script.js"
+    <script src="<?= base_url()?>assets/template/crms/assets/js/script.js"
         type="73a48659308a20cc46ca82f1-text/javascript"></script>
 
     <script src="../../cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js"

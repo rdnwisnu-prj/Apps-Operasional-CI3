@@ -10,12 +10,12 @@
     <!-- Favicon -->
     <link rel="shortcut icon" href="<?= base_url()?>assets/img/favicon.ico">
 
-    <link href="<?= base_url()?>vendor/template/assets/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+    <link href="<?= base_url()?>assets/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
 
-    <link href="<?= base_url()?>vendor/template/material/assets/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="<?= base_url()?>vendor/template/material/assets/css/icons.min.css" rel="stylesheet" />
-    <link href="<?= base_url()?>vendor/template/material/assets/css/app.min.css" rel="stylesheet" />
-    <link href="<?= base_url()?>vendor/template/material/assets/css/custom.min.css" rel="stylesheet" />
+    <link href="<?= base_url()?>assets/template/material/assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="<?= base_url()?>assets/template/material/assets/css/icons.min.css" rel="stylesheet" />
+    <link href="<?= base_url()?>assets/template/material/assets/css/app.min.css" rel="stylesheet" />
+    <link href="<?= base_url()?>assets/template/material/assets/css/custom.min.css" rel="stylesheet" />
 
 
     <link href="<?= base_url()?>assets/css/style.css" rel="stylesheet">
@@ -94,16 +94,16 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
-    <script src="<?= base_url()?>vendor/template/material/assets/js/layout.js"></script>
-    <script src="<?= base_url()?>vendor/template/material/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= base_url()?>vendor/template/material/assets/libs/simplebar/simplebar.min.js"></script>
-    <script src="<?= base_url()?>vendor/template/material/assets/libs/node-waves/waves.min.js"></script>
-    <script src="<?= base_url()?>vendor/template/material/assets/libs/feather-icons/feather.min.js"></script>
-    <script src="<?= base_url()?>vendor/template/material/assets/js/pages/plugins/lord-icon-2.1.0.js"></script>
+    <script src="<?= base_url()?>assets/template/material/assets/js/layout.js"></script>
+    <script src="<?= base_url()?>assets/template/material/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= base_url()?>assets/template/material/assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="<?= base_url()?>assets/template/material/assets/libs/node-waves/waves.min.js"></script>
+    <script src="<?= base_url()?>assets/template/material/assets/libs/feather-icons/feather.min.js"></script>
+    <script src="<?= base_url()?>assets/template/material/assets/js/pages/plugins/lord-icon-2.1.0.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <script src="<?= base_url()?>vendor/template/material/assets/js/pages/password-addon.init.js"></script>
-    <script src="<?= base_url()?>vendor/template/assets/libs/sweetalert2/sweetalert2.min.js"></script>
+    <script src="<?= base_url()?>assets/template/material/assets/js/pages/password-addon.init.js"></script>
+    <script src="<?= base_url()?>assets/libs/sweetalert2/sweetalert2.min.js"></script>
     <script src="<?= base_url()?>assets/js/proses.js"></script>
 </body>
 

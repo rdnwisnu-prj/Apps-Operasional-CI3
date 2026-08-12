@@ -13,9 +13,9 @@
 
     <!-- All CSS -->
     <link rel="stylesheet" href="<?= base_url()?>assets/libs/sweetalert2/sweetalert2.min.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/css/style.css" id="app-style">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/css/style.css" id="app-style">
     <link rel="stylesheet" href="<?= base_url()?>assets/css/style.css">
 
 </head>
@@ -33,7 +33,7 @@
                 <div class="col-md-8 d-flex align-items-center justify-content-center mx-auto">
                     <div>
                         <div class="error-img p-4">
-                            <img src="<?= base_url()?>vendor/template/crms/assets/img/authentication/error-404.png"
+                            <img src="<?= base_url()?>assets/template/crms/assets/img/authentication/error-404.png"
                                 class="img-fluid" alt="Img">
                         </div>
                         <div class="text-center">
@@ -57,11 +57,11 @@
 
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
-    <script src="<?= base_url()?>vendor/template/crms/assets/js/bootstrap.bundle.min.js"
+    <script src="<?= base_url()?>assets/template/crms/assets/js/bootstrap.bundle.min.js"
         type="a03f46baa9905325ffa4b311-text/javascript"></script>
-    <script src="<?= base_url()?>vendor/template/crms/assets/js/script.js"
+    <script src="<?= base_url()?>assets/template/crms/assets/js/script.js"
         type="a03f46baa9905325ffa4b311-text/javascript"></script>
-    <script src="<?= base_url()?>vendor/template/crms/assets/js/rocket-loader.min.js"
+    <script src="<?= base_url()?>assets/template/crms/assets/js/rocket-loader.min.js"
         data-cf-settings="44b437367635bc0df7253194-|49" defer></script>
     <script src="<?= base_url()?>assets/libs/sweetalert2/sweetalert2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

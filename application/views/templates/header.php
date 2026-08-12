@@ -17,29 +17,29 @@
 
     <!-- All CSS -->
     <link rel="stylesheet" href="<?= base_url()?>assets/libs/sweetalert2/sweetalert2.min.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/css/bootstrap.min.css">
     <link rel="stylesheet"
-        href="<?= base_url()?>vendor/template/crms/assets/plugins/daterangepicker/daterangepicker.css">
+        href="<?= base_url()?>assets/template/crms/assets/plugins/daterangepicker/daterangepicker.css">
 
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/plugins/icons/remix/remixicon.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/plugins/simplebar/simplebar.min.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/css/style.css" id="app-style">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/plugins/icons/remix/remixicon.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/plugins/simplebar/simplebar.min.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/css/style.css" id="app-style">
     <link rel="stylesheet"
-        href="<?= base_url()?>vendor/template/crms/assets/plugins/choices.js/public/assets/styles/choices.min.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/plugins/flatpickr/flatpickr.min.css">
+        href="<?= base_url()?>assets/template/crms/assets/plugins/choices.js/public/assets/styles/choices.min.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/plugins/flatpickr/flatpickr.min.css">
 
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
 
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/plugins/quill/quill.core.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/plugins/quill/quill.snow.css">
-    <link rel="stylesheet" href="<?= base_url()?>vendor/template/crms/assets/plugins/quill/quill.bubble.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/plugins/quill/quill.core.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/plugins/quill/quill.snow.css">
+    <link rel="stylesheet" href="<?= base_url()?>assets/template/crms/assets/plugins/quill/quill.bubble.css">
     <link rel="stylesheet" href="<?= base_url()?>assets/css/style.css">
     <link rel="stylesheet" href="<?= base_url()?>assets/css/custom.css">
 
