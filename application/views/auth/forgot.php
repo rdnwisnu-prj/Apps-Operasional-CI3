@@ -110,7 +110,7 @@
         </section>
     </main>
 
-    <script src="<?= base_url() ?>assets/vendor/jquery.min.js"></script>
+    <script src="<?= base_url() ?>assets/template/crms/assets/js/jquery-3.7.1.min.js"></script>
     <script src="<?= base_url() ?>assets/template/crms/assets/js/bootstrap.bundle.min.js"></script>
     <script src="<?= base_url() ?>assets/template/crms/assets/js/script.js"></script>
     <script src="<?= base_url() ?>assets/libs/sweetalert2/sweetalert2.min.js"></script>
