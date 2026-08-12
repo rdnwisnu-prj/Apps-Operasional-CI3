@@ -1,0 +1,82 @@
+name: Deploy Apps Operasional
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apps-operasional-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Simulasi deployment FTPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Ambil source code
+        uses: actions/checkout@v5
+
+      - name: Instal lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Validasi konfigurasi
+        shell: bash
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+        run: |
+          test -n "$FTP_SERVER"
+          test -n "$FTP_USERNAME"
+          test -n "$FTP_PASSWORD"
+          test -n "$FTP_PORT"
+
+      - name: Simulasi upload ke production
+        shell: bash
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+        run: |
+          lftp \
+            -u "$FTP_USERNAME","$FTP_PASSWORD" \
+            -p "$FTP_PORT" \
+            "$FTP_SERVER" <<'LFTP_COMMANDS'
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ftp:passive-mode true
+          set ssl:verify-certificate true
+          set net:max-retries 2
+          set net:timeout 30
+
+          mirror --reverse --dry-run --verbose \
+            --exclude-glob=.git/** \
+            --exclude-glob=.github/** \
+            --exclude-glob=.gitignore \
+            --exclude-glob=.cpanel.yml \
+            --exclude-glob=deploy.ps1 \
+            --exclude-glob=.env \
+            --exclude-glob=*.sql \
+            --exclude-glob=*.zip \
+            --exclude-glob=*.tar \
+            --exclude-glob=*.gz \
+            --exclude-glob=application/config/database.php \
+            --exclude-glob=application/config/config.php \
+            --exclude-glob=application/config/email.php \
+            --exclude-glob=application/cache/** \
+            --exclude-glob=application/logs/** \
+            --exclude-glob=application/sessions/** \
+            --exclude-glob=uploads/** \
+            --exclude-glob=assets/uploads/** \
+            ./ ./
+
+          bye
+          LFTP_COMMANDS
