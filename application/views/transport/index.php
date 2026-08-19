@@ -23,10 +23,15 @@ if ($current_role_id === 8) {
 }
 ?>
 <style>
-<?php if (!$can_manage_operasional): ?>
-.operasional-manage-only { display: none !important; }
-<?php endif; ?>
-.flatpickr-calendar.transport-offcanvas-flatpickr { z-index: 20000 !important; }
+<?php if ( !$can_manage_operasional): ?>.operasional-manage-only {
+    display: none !important;
+}
+
+<?php endif;
+
+?>.flatpickr-calendar.transport-offcanvas-flatpickr {
+    z-index: 20000 !important;
+}
 </style>
 <div class="page-wrapper">
 
@@ -49,7 +54,8 @@ if ($current_role_id === 8) {
                     </ol>
                 </nav>
             </div>
-            <button class="btn btn-custom mt-2 mt-md-0 operasional-manage-only" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-transport-add" aria-controls="offcanvas-transport-add">
+            <button class="btn btn-custom mt-2 mt-md-0 operasional-manage-only" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvas-transport-add" aria-controls="offcanvas-transport-add">
                 <i class="ti ti-circle-plus me-1"></i>Tambah Data
             </button>
         </div>
@@ -59,7 +65,8 @@ if ($current_role_id === 8) {
                 <h5 class="card-title mb-0 flex-grow-1">Daftar <?= html_escape($subheader); ?></h5>
             </div>
             <div class="card-body">
-                <table id="general" class="table nowrap dt-responsive align-middle table-hover bordered-table" style="width:100%">
+                <table id="general" class="table nowrap dt-responsive align-middle table-hover bordered-table"
+                    style="width:100%">
                     <thead>
                         <tr>
                             <th class="text-center" style="width:3%">No</th>
@@ -83,11 +90,18 @@ if ($current_role_id === 8) {
                         <?php foreach ($transport as $row): ?>
                         <tr>
                             <td class="text-center"><?= $no++; ?></td>
-                            <td><span class="badge bg-primary-subtle text-primary me-1"><?= html_escape($row['project']); ?></span><?= html_escape($row['nama_project'] ?? '-'); ?></td>
-                            <td><?= !empty($row['tgl_transport']) ? tanggal_indonesia_medium($row['tgl_transport']) : '-'; ?></td>
-                            <td class="text-center"><?= html_escape($proses_labels[(string) ($row['proses'] ?? '')] ?? '-'); ?></td>
-                            <td><span class="badge bg-info-subtle text-info"><?= html_escape($row['jenis_pengeluaran'] ?? 'Mobil'); ?></span></td>
-                            <td class="text-end">Rp <?= html_escape(number_format((float) ($row['nominal'] ?? 0), 0, ',', '.')); ?></td>
+                            <td><span
+                                    class="badge bg-primary-subtle text-primary me-1"><?= html_escape($row['project']); ?></span><?= html_escape($row['nama_project'] ?? '-'); ?>
+                            </td>
+                            <td><?= !empty($row['tgl_transport']) ? tanggal_indonesia_medium($row['tgl_transport']) : '-'; ?>
+                            </td>
+                            <td class="text-center">
+                                <?= html_escape($proses_labels[(string) ($row['proses'] ?? '')] ?? '-'); ?></td>
+                            <td><span
+                                    class="badge bg-info-subtle text-info"><?= html_escape($row['jenis_pengeluaran'] ?? 'Mobil'); ?></span>
+                            </td>
+                            <td class="text-end">Rp
+                                <?= html_escape(number_format((float) ($row['nominal'] ?? 0), 0, ',', '.')); ?></td>
                             <td><?= html_escape(($row['transport'] ?? '') ?: '-'); ?></td>
                             <td><?= html_escape(($row['jenis'] ?? '') ?: '-'); ?></td>
                             <td><?= html_escape(($row['tipe'] ?? '') ?: '-'); ?></td>
@@ -95,22 +109,29 @@ if ($current_role_id === 8) {
                             <td><?= html_escape(($row['nopol_kendaraan'] ?? '') ?: '-'); ?></td>
                             <td class="text-center">
                                 <?php if (!empty($row['lampiran'])): ?>
-                                <a href="<?= base_url('uploads/transport/' . rawurlencode($row['lampiran'])); ?>" target="_blank" data-bs-toggle="tooltip" title="Lihat Bukti/Struk"><i class="ti ti-photo fs-18 text-primary"></i></a>
+                                <a href="<?= base_url('uploads/transport/' . rawurlencode($row['lampiran'])); ?>"
+                                    target="_blank" data-bs-toggle="tooltip" title="Lihat Bukti/Struk"><i
+                                        class="ti ti-photo fs-18 text-primary"></i></a>
                                 <?php else: ?>-
                                 <?php endif; ?>
                             </td>
                             <td class="text-center">
                                 <?php if (!empty($row['stnk'])): ?>
-                                <a href="<?= base_url('uploads/transport/' . rawurlencode($row['stnk'])); ?>" target="_blank" data-bs-toggle="tooltip" title="Lihat STNK"><i class="ti ti-file-certificate fs-18 text-primary"></i></a>
+                                <a href="<?= base_url('uploads/transport/' . rawurlencode($row['stnk'])); ?>"
+                                    target="_blank" data-bs-toggle="tooltip" title="Lihat STNK"><i
+                                        class="ti ti-file-certificate fs-18 text-primary"></i></a>
                                 <?php else: ?>-
                                 <?php endif; ?>
                             </td>
                             <td class="text-end operasional-manage-only">
                                 <div class="dropdown table-action">
-                                    <button class="action-icon btn btn-xs shadow btn-icon btn-outline-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="ti ti-dots-vertical"></i></button>
+                                    <button class="action-icon btn btn-xs shadow btn-icon btn-outline-light"
+                                        type="button" data-bs-toggle="dropdown" aria-expanded="false"><i
+                                            class="ti ti-dots-vertical"></i></button>
                                     <ul class="dropdown-menu dropdown-menu-right">
                                         <li>
-                                            <a class="dropdown-item btn-edit-transport" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-transport-edit"
+                                            <a class="dropdown-item btn-edit-transport" href="javascript:void(0);"
+                                                data-bs-toggle="offcanvas" data-bs-target="#offcanvas-transport-edit"
                                                 data-id="<?= (int) $row['id_transport']; ?>"
                                                 data-project="<?= html_escape($row['project'] ?? ''); ?>"
                                                 data-proses="<?= html_escape($row['proses'] ?? ''); ?>"
@@ -129,7 +150,10 @@ if ($current_role_id === 8) {
                                                 <i class="ri-pencil-line align-bottom me-2 text-muted"></i>Edit
                                             </a>
                                         </li>
-                                        <li><a class="dropdown-item btn-destroy" href="<?= base_url('Transport/destroy/' . $row['id_transport']); ?>"><i class="ri-delete-bin-line align-bottom me-2 text-muted"></i>Delete</a></li>
+                                        <li><a class="dropdown-item btn-destroy"
+                                                href="<?= base_url('Transport/destroy/' . $row['id_transport']); ?>"><i
+                                                    class="ri-delete-bin-line align-bottom me-2 text-muted"></i>Delete</a>
+                                        </li>
                                     </ul>
                                 </div>
                             </td>
@@ -141,122 +165,149 @@ if ($current_role_id === 8) {
         </div>
     </div>
 
-    <div class="offcanvas offcanvas-end operasional-manage-only" tabindex="-1" id="offcanvas-transport-add" aria-labelledby="offcanvas-transport-add-label">
+    <div class="offcanvas offcanvas-end operasional-manage-only" tabindex="-1" id="offcanvas-transport-add"
+        aria-labelledby="offcanvas-transport-add-label">
         <div class="offcanvas-header border-bottom">
             <h4 id="offcanvas-transport-add-label" class="mb-0">Tambah <?= html_escape($subheader); ?></h4>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <form id="form-add-transport" class="transport-form" action="<?= base_url('Transport/Store'); ?>" method="post" enctype="multipart/form-data">
+            <form id="form-add-transport" class="transport-form" action="<?= base_url('Transport/Store'); ?>"
+                method="post" enctype="multipart/form-data">
                 <?php $form_mode = 'add'; include __DIR__ . '/_form_offcanvas.php'; ?>
             </form>
         </div>
         <div class="offcanvas-footer border-top p-3 d-flex justify-content-between align-items-center">
             <button type="button" class="btn btn-outline-light" data-bs-dismiss="offcanvas">Cancel</button>
-            <button type="submit" form="form-add-transport" class="btn btn-custom"><i class="ri-checkbox-circle-line me-1"></i>Save</button>
+            <button type="submit" form="form-add-transport" class="btn btn-custom"><i
+                    class="ri-checkbox-circle-line me-1"></i>Save</button>
         </div>
     </div>
 
-    <div class="offcanvas offcanvas-end operasional-manage-only" tabindex="-1" id="offcanvas-transport-edit" aria-labelledby="offcanvas-transport-edit-label">
+    <div class="offcanvas offcanvas-end operasional-manage-only" tabindex="-1" id="offcanvas-transport-edit"
+        aria-labelledby="offcanvas-transport-edit-label">
         <div class="offcanvas-header border-bottom">
             <h4 id="offcanvas-transport-edit-label" class="mb-0">Edit <?= html_escape($subheader); ?></h4>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <form id="form-edit-transport" class="transport-form" action="<?= base_url('Transport/update'); ?>" method="post" enctype="multipart/form-data">
+            <form id="form-edit-transport" class="transport-form" action="<?= base_url('Transport/update'); ?>"
+                method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id_transport" value="">
                 <?php $form_mode = 'edit'; include __DIR__ . '/_form_offcanvas.php'; ?>
             </form>
         </div>
         <div class="offcanvas-footer border-top p-3 d-flex justify-content-between align-items-center">
             <button type="button" class="btn btn-outline-light" data-bs-dismiss="offcanvas">Cancel</button>
-            <button type="submit" form="form-edit-transport" class="btn btn-custom"><i class="ri-checkbox-circle-line me-1"></i>Update</button>
+            <button type="submit" form="form-edit-transport" class="btn btn-custom"><i
+                    class="ri-checkbox-circle-line me-1"></i>Update</button>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    function initTransportForm(form) {
-        var $form = $(form);
-        var $tgl = $form.find('.js-tgl-transport');
-        var picker = null;
-        if (typeof flatpickr !== 'undefined' && $tgl.length) {
-            picker = flatpickr($tgl[0], {
-                dateFormat: 'Y-m-d', allowInput: true, disableMobile: true, appendTo: document.body,
-                onReady: function(selectedDates, dateStr, instance) { instance.calendarContainer.classList.add('transport-offcanvas-flatpickr'); },
-                onOpen: function(selectedDates, dateStr, instance) { instance.calendarContainer.classList.add('transport-offcanvas-flatpickr'); }
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function initTransportForm(form) {
+            var $form = $(form);
+            var $tgl = $form.find('.js-tgl-transport');
+            var picker = null;
+            if (typeof flatpickr !== 'undefined' && $tgl.length) {
+                picker = flatpickr($tgl[0], {
+                    dateFormat: 'Y-m-d',
+                    allowInput: true,
+                    disableMobile: true,
+                    appendTo: document.body,
+                    onReady: function(selectedDates, dateStr, instance) {
+                        instance.calendarContainer.classList.add('transport-offcanvas-flatpickr');
+                    },
+                    onOpen: function(selectedDates, dateStr, instance) {
+                        instance.calendarContainer.classList.add('transport-offcanvas-flatpickr');
+                    }
+                });
+            }
+
+            function toggleSewaFields() {
+                var isMobil = $form.find('[name="jenis_pengeluaran"]').val() === 'Mobil';
+                var isSewa = isMobil && $form.find('[name="transport"]').val() === 'Sewa';
+                $form.find('.js-mobil-fields').toggleClass('d-none', !isMobil);
+                $form.find('.js-mobil-required').prop('required', isMobil);
+                if (!isMobil) {
+                    $form.find('[name="transport"], [name="jenis"], [name="tipe"]').val('');
+                }
+                $form.find('.js-sewa-fields').toggleClass('d-none', !isSewa);
+                $form.find('.js-sewa-required').prop('required', isSewa);
+                if (!isSewa) {
+                    $form.find('.js-sewa-required').not('[type="file"]').val('');
+                    $form.find('[name="stnk"]').val('');
+                }
+            }
+            $form.find('[name="jenis_pengeluaran"]').on('change', toggleSewaFields);
+            $form.find('[name="transport"]').on('change', toggleSewaFields);
+            $form.data('transportForm', {
+                setDate: function(value) {
+                    picker && picker.setDate ? picker.setDate(value || null, false, 'Y-m-d') : $tgl
+                        .val(value || '');
+                },
+                toggleSewaFields: toggleSewaFields
             });
+            toggleSewaFields();
         }
-        function toggleSewaFields() {
-            var isMobil = $form.find('[name="jenis_pengeluaran"]').val() === 'Mobil';
-            var isSewa = isMobil && $form.find('[name="transport"]').val() === 'Sewa';
-            $form.find('.js-mobil-fields').toggleClass('d-none', !isMobil);
-            $form.find('.js-mobil-required').prop('required', isMobil);
-            if (!isMobil) {
-                $form.find('[name="transport"], [name="jenis"], [name="tipe"]').val('');
-            }
-            $form.find('.js-sewa-fields').toggleClass('d-none', !isSewa);
-            $form.find('.js-sewa-required').prop('required', isSewa);
-            if (!isSewa) {
-                $form.find('.js-sewa-required').not('[type="file"]').val('');
-                $form.find('[name="stnk"]').val('');
-            }
-        }
-        $form.find('[name="jenis_pengeluaran"]').on('change', toggleSewaFields);
-        $form.find('[name="transport"]').on('change', toggleSewaFields);
-        $form.data('transportForm', {
-            setDate: function(value) { picker && picker.setDate ? picker.setDate(value || null, false, 'Y-m-d') : $tgl.val(value || ''); },
-            toggleSewaFields: toggleSewaFields
+
+        $('.transport-form').each(function() {
+            initTransportForm(this);
         });
-        toggleSewaFields();
-    }
 
-    $('.transport-form').each(function() { initTransportForm(this); });
+        $('#offcanvas-transport-add').on('show.bs.offcanvas', function() {
+            var $form = $('#form-add-transport');
+            $form[0].reset();
+            $form.find('input[type="file"]').val('');
+            var methods = $form.data('transportForm');
+            if (methods) {
+                methods.setDate('');
+                methods.toggleSewaFields();
+            }
+        });
 
-    $('#offcanvas-transport-add').on('show.bs.offcanvas', function() {
-        var $form = $('#form-add-transport');
-        $form[0].reset();
-        $form.find('input[type="file"]').val('');
-        var methods = $form.data('transportForm');
-        if (methods) { methods.setDate(''); methods.toggleSewaFields(); }
+        $('.btn-edit-transport').on('click', function() {
+            var $button = $(this);
+            var $form = $('#form-edit-transport');
+            var methods = $form.data('transportForm');
+            var lampiran = $button.attr('data-lampiran') || '';
+            var stnk = $button.attr('data-stnk') || '';
+            $form[0].reset();
+            $form.find('input[type="file"]').val('');
+            $form.find('[name="id_transport"]').val($button.attr('data-id') || '');
+            $form.find('[name="project"]').val($button.attr('data-project') || '');
+            $form.find('[name="proses"]').val($button.attr('data-proses') || '');
+            $form.find('[name="jenis_pengeluaran"]').val($button.attr('data-jenis-pengeluaran') ||
+                'Mobil');
+            $form.find('[name="nominal"]').val($button.attr('data-nominal') || '0');
+            $form.find('[name="transport"]').val($button.attr('data-transport') || '');
+            $form.find('[name="jenis"]').val($button.attr('data-jenis') || '');
+            $form.find('[name="tipe"]').val($button.attr('data-tipe') || '');
+            $form.find('[name="nama_pemilik"]').val($button.attr('data-nama-pemilik') || '');
+            $form.find('[name="nopol_kendaraan"]').val($button.attr('data-nopol-kendaraan') || '');
+            $form.find('[name="ktp_pemilik"]').val($button.attr('data-ktp-pemilik') || '');
+            $form.find('[name="keterangan"]').val($button.attr('data-keterangan') || '');
+            if (methods) {
+                methods.setDate($button.attr('data-tgl-transport') || '');
+                methods.toggleSewaFields();
+            }
+            if (lampiran) {
+                $form.find('.js-current-lampiran-wrap').removeClass('d-none');
+                $form.find('.js-current-lampiran').attr('href', base_url + 'uploads/transport/' +
+                    encodeURIComponent(lampiran));
+            } else {
+                $form.find('.js-current-lampiran-wrap').addClass('d-none');
+                $form.find('.js-current-lampiran').attr('href', 'javascript:void(0);');
+            }
+            if (stnk) {
+                $form.find('.js-current-stnk-wrap').removeClass('d-none');
+                $form.find('.js-current-stnk').attr('href', base_url + 'uploads/transport/' +
+                    encodeURIComponent(stnk));
+            } else {
+                $form.find('.js-current-stnk-wrap').addClass('d-none');
+                $form.find('.js-current-stnk').attr('href', 'javascript:void(0);');
+            }
+        });
     });
-
-    $('.btn-edit-transport').on('click', function() {
-        var $button = $(this);
-        var $form = $('#form-edit-transport');
-        var methods = $form.data('transportForm');
-        var lampiran = $button.attr('data-lampiran') || '';
-        var stnk = $button.attr('data-stnk') || '';
-        $form[0].reset();
-        $form.find('input[type="file"]').val('');
-        $form.find('[name="id_transport"]').val($button.attr('data-id') || '');
-        $form.find('[name="project"]').val($button.attr('data-project') || '');
-        $form.find('[name="proses"]').val($button.attr('data-proses') || '');
-        $form.find('[name="jenis_pengeluaran"]').val($button.attr('data-jenis-pengeluaran') || 'Mobil');
-        $form.find('[name="nominal"]').val($button.attr('data-nominal') || '0');
-        $form.find('[name="transport"]').val($button.attr('data-transport') || '');
-        $form.find('[name="jenis"]').val($button.attr('data-jenis') || '');
-        $form.find('[name="tipe"]').val($button.attr('data-tipe') || '');
-        $form.find('[name="nama_pemilik"]').val($button.attr('data-nama-pemilik') || '');
-        $form.find('[name="nopol_kendaraan"]').val($button.attr('data-nopol-kendaraan') || '');
-        $form.find('[name="ktp_pemilik"]').val($button.attr('data-ktp-pemilik') || '');
-        $form.find('[name="keterangan"]').val($button.attr('data-keterangan') || '');
-        if (methods) { methods.setDate($button.attr('data-tgl-transport') || ''); methods.toggleSewaFields(); }
-        if (lampiran) {
-            $form.find('.js-current-lampiran-wrap').removeClass('d-none');
-            $form.find('.js-current-lampiran').attr('href', base_url + 'uploads/transport/' + encodeURIComponent(lampiran));
-        } else {
-            $form.find('.js-current-lampiran-wrap').addClass('d-none');
-            $form.find('.js-current-lampiran').attr('href', 'javascript:void(0);');
-        }
-        if (stnk) {
-            $form.find('.js-current-stnk-wrap').removeClass('d-none');
-            $form.find('.js-current-stnk').attr('href', base_url + 'uploads/transport/' + encodeURIComponent(stnk));
-        } else {
-            $form.find('.js-current-stnk-wrap').addClass('d-none');
-            $form.find('.js-current-stnk').attr('href', 'javascript:void(0);');
-        }
-    });
-});
-</script>
+    </script>
