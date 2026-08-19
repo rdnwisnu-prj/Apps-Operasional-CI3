@@ -46,28 +46,9 @@ jobs:
           du -sh vendor
 
       - name: Instal lftp
-        shell: bash
-        timeout-minutes: 10
         run: |
-          if command -v lftp >/dev/null 2>&1; then
-            echo "lftp sudah tersedia."
-            lftp --version
-            exit 0
-          fi
-
-          sudo apt-get \
-            -o Acquire::Retries=3 \
-            -o Acquire::http::Timeout=20 \
-            -o Acquire::https::Timeout=20 \
-            update
-
-          sudo apt-get \
-            -o Acquire::Retries=3 \
-            -o Acquire::http::Timeout=20 \
-            -o Acquire::https::Timeout=20 \
-            install -y --no-install-recommends lftp
-
-          lftp --version
+          sudo apt-get update
+          sudo apt-get install -y lftp
 
       - name: Validasi konfigurasi FTP
         shell: bash
@@ -82,9 +63,8 @@ jobs:
           test -n "$FTP_PASSWORD"
           test -n "$FTP_PORT"
 
-            - name: Upload source dan vendor ke production
+      - name: Upload source dan vendor ke production
         shell: bash
-        timeout-minutes: 100
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -96,24 +76,18 @@ jobs:
             -p "$FTP_PORT" \
             "$FTP_SERVER" <<'LFTP_COMMANDS'
 
-          set cmd:fail-exit true
-
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:passive-mode true
-
           set ssl:verify-certificate true
           set ssl:check-hostname false
-
           set net:max-retries 10
           set net:timeout 120
           set net:reconnect-interval-base 5
           set net:reconnect-interval-max 30
 
-          echo "Menguji koneksi dan membaca folder production..."
           cls -1
 
-          echo "Memulai deployment..."
           mirror --reverse --verbose --parallel=1 \
             --exclude-glob=.git/** \
             --exclude-glob=.github/** \
@@ -133,9 +107,7 @@ jobs:
             --exclude-glob=application/sessions/** \
             --exclude-glob=uploads/** \
             --exclude-glob=assets/uploads/** \
-            --exclude-glob=assets/upload/** \
             ./ ./
 
-          echo "Deployment selesai."
           bye
           LFTP_COMMANDS
