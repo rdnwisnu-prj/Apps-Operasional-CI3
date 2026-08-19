@@ -67,6 +67,7 @@ if ($current_role_id === 8) {
                             <th>Tanggal</th>
                             <th class="text-center">Proses</th>
                             <th>Jenis Pengeluaran</th>
+                            <th class="text-end">Nominal</th>
                             <th>Transport</th>
                             <th>Jenis</th>
                             <th>Merk Kendaraan</th>
@@ -86,6 +87,7 @@ if ($current_role_id === 8) {
                             <td><?= !empty($row['tgl_transport']) ? tanggal_indonesia_medium($row['tgl_transport']) : '-'; ?></td>
                             <td class="text-center"><?= html_escape($proses_labels[(string) ($row['proses'] ?? '')] ?? '-'); ?></td>
                             <td><span class="badge bg-info-subtle text-info"><?= html_escape($row['jenis_pengeluaran'] ?? 'Mobil'); ?></span></td>
+                            <td class="text-end">Rp <?= html_escape(number_format((float) ($row['nominal'] ?? 0), 0, ',', '.')); ?></td>
                             <td><?= html_escape(($row['transport'] ?? '') ?: '-'); ?></td>
                             <td><?= html_escape(($row['jenis'] ?? '') ?: '-'); ?></td>
                             <td><?= html_escape(($row['tipe'] ?? '') ?: '-'); ?></td>
@@ -113,6 +115,7 @@ if ($current_role_id === 8) {
                                                 data-project="<?= html_escape($row['project'] ?? ''); ?>"
                                                 data-proses="<?= html_escape($row['proses'] ?? ''); ?>"
                                                 data-jenis-pengeluaran="<?= html_escape($row['jenis_pengeluaran'] ?? 'Mobil'); ?>"
+                                                data-nominal="<?= html_escape($row['nominal'] ?? 0); ?>"
                                                 data-tgl-transport="<?= html_escape($row['tgl_transport'] ?? ''); ?>"
                                                 data-transport="<?= html_escape($row['transport'] ?? ''); ?>"
                                                 data-jenis="<?= html_escape($row['jenis'] ?? ''); ?>"
@@ -231,6 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $form.find('[name="project"]').val($button.attr('data-project') || '');
         $form.find('[name="proses"]').val($button.attr('data-proses') || '');
         $form.find('[name="jenis_pengeluaran"]').val($button.attr('data-jenis-pengeluaran') || 'Mobil');
+        $form.find('[name="nominal"]').val($button.attr('data-nominal') || '0');
         $form.find('[name="transport"]').val($button.attr('data-transport') || '');
         $form.find('[name="jenis"]').val($button.attr('data-jenis') || '');
         $form.find('[name="tipe"]').val($button.attr('data-tipe') || '');

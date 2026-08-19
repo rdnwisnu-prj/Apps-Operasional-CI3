@@ -25,6 +25,13 @@
         <?php endforeach; ?>
     </select>
 </div>
+<div class="mb-3">
+    <label class="form-label" for="<?= $form_mode; ?>_nominal">Nominal <span class="text-danger">*</span></label>
+    <div class="input-group">
+        <span class="input-group-text">Rp</span>
+        <input type="number" class="form-control" id="<?= $form_mode; ?>_nominal" name="nominal" min="0" step="1" inputmode="numeric" placeholder="0" required>
+    </div>
+</div>
 <div class="row g-2 js-mobil-fields d-none">
     <div class="col-md-6 mb-3">
         <label class="form-label" for="<?= $form_mode; ?>_transport">Transport <span class="text-danger">*</span></label>

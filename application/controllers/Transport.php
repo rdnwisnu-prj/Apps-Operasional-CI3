@@ -285,6 +285,7 @@ class Transport extends CI_Controller
         $this->form_validation->set_rules('tgl_transport', 'Tanggal Transport', 'required|trim');
         $this->form_validation->set_rules('proses', 'Proses', 'required|trim|callback_validRoleProses');
         $this->form_validation->set_rules('jenis_pengeluaran', 'Jenis Pengeluaran', 'required|trim|in_list[BBM,Toll,Parkir,Mobil]');
+        $this->form_validation->set_rules('nominal', 'Nominal', 'required|trim|numeric|greater_than_equal_to[0]');
         $this->form_validation->set_rules('transport', 'Transport', 'trim|callback_requiredTransportIfMobil');
         $this->form_validation->set_rules('jenis', 'Jenis', 'trim|callback_requiredJenisIfMobil');
         $this->form_validation->set_rules('tipe', 'Merk Kendaraan', 'trim|callback_requiredTipeIfMobil');
@@ -305,6 +306,7 @@ class Transport extends CI_Controller
             'proses'              => $this->input->post('proses', true),
             'jenis_pengeluaran'   => $jenisPengeluaran,
             'tgl_transport'       => $this->input->post('tgl_transport', true),
+            'nominal'             => (float) str_replace(['.', ','], ['', '.'], (string) $this->input->post('nominal', true)),
             'transport'           => $transport,
             'jenis'               => $isMobil ? $this->input->post('jenis', true) : '',
             'tipe'                => $isMobil ? $this->input->post('tipe', true) : '',
