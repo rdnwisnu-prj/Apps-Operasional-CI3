@@ -46,9 +46,28 @@ jobs:
           du -sh vendor
 
       - name: Instal lftp
+        shell: bash
+        timeout-minutes: 10
         run: |
-          sudo apt-get update
-          sudo apt-get install -y lftp
+          if command -v lftp >/dev/null 2>&1; then
+            echo "lftp sudah tersedia."
+            lftp --version
+            exit 0
+          fi
+
+          sudo apt-get \
+            -o Acquire::Retries=3 \
+            -o Acquire::http::Timeout=20 \
+            -o Acquire::https::Timeout=20 \
+            update
+
+          sudo apt-get \
+            -o Acquire::Retries=3 \
+            -o Acquire::http::Timeout=20 \
+            -o Acquire::https::Timeout=20 \
+            install -y --no-install-recommends lftp
+
+          lftp --version
 
       - name: Validasi konfigurasi FTP
         shell: bash
