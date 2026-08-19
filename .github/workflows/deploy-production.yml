@@ -82,8 +82,9 @@ jobs:
           test -n "$FTP_PASSWORD"
           test -n "$FTP_PORT"
 
-      - name: Upload source dan vendor ke production
+            - name: Upload source dan vendor ke production
         shell: bash
+        timeout-minutes: 100
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -95,15 +96,25 @@ jobs:
             -p "$FTP_PORT" \
             "$FTP_SERVER" <<'LFTP_COMMANDS'
 
+          set cmd:fail-exit true
+
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:passive-mode true
+
           set ssl:verify-certificate true
           set ssl:check-hostname false
-          set net:max-retries 3
-          set net:timeout 60
 
-          mirror --reverse --verbose --parallel=4 \
+          set net:max-retries 10
+          set net:timeout 120
+          set net:reconnect-interval-base 5
+          set net:reconnect-interval-max 30
+
+          echo "Menguji koneksi dan membaca folder production..."
+          cls -1
+
+          echo "Memulai deployment..."
+          mirror --reverse --verbose --parallel=1 \
             --exclude-glob=.git/** \
             --exclude-glob=.github/** \
             --exclude-glob=.gitignore \
@@ -122,7 +133,9 @@ jobs:
             --exclude-glob=application/sessions/** \
             --exclude-glob=uploads/** \
             --exclude-glob=assets/uploads/** \
+            --exclude-glob=assets/upload/** \
             ./ ./
 
+          echo "Deployment selesai."
           bye
           LFTP_COMMANDS
