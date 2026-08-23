@@ -459,6 +459,39 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
             });
         }
 
+        function getProjectDateRange($form) {
+            return {
+                minDate: $form.find('[name="tgl_mulai"]').val() || null,
+                maxDate: $form.find('[name="tgl_selesai"]').val() || null
+            };
+        }
+
+        function syncKorlapDateRange($form) {
+            if (typeof flatpickr === 'undefined') return;
+
+            var range = getProjectDateRange($form);
+            $form.find('.js-korlap-date').each(function() {
+                if (!this._flatpickr) {
+                    flatpickr(this, {
+                        dateFormat: 'Y-m-d',
+                        allowInput: true,
+                        disableMobile: true,
+                        appendTo: document.body
+                    });
+                }
+
+                this._flatpickr.set('minDate', range.minDate);
+                this._flatpickr.set('maxDate', range.maxDate);
+
+                if (this.value && (range.minDate || range.maxDate)) {
+                    var selected = this.value;
+                    if ((range.minDate && selected < range.minDate) || (range.maxDate && selected > range.maxDate)) {
+                        this._flatpickr.clear();
+                    }
+                }
+            });
+        }
+
         function setDate($input, value) {
             var input = $input[0];
             if (input && input._flatpickr) {
@@ -493,6 +526,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
             $form.find('.js-info-kota').val(data.nama_kota || '');
             setDate($form.find('[name="tgl_mulai"]'), data.tgl_pelaksanaan || data.tgl_mulai || '');
             setDate($form.find('[name="tgl_selesai"]'), data.tgl_selesai || '');
+            syncKorlapDateRange($form);
         }
 
         function korlapRow(row) {
@@ -526,6 +560,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
             });
             updateRemoveButtons($form);
             initFlatpickr($container);
+            syncKorlapDateRange($form);
         }
 
         function updateRemoveButtons($form) {
@@ -558,6 +593,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                 $container.append(korlapRow({}));
                 updateRemoveButtons($form);
                 initFlatpickr($container.find('.korlap-row:last'));
+                syncKorlapDateRange($form);
             });
 
         $(document)
@@ -601,6 +637,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                 initFlatpickr($form);
                 setDate($form.find('[name="tgl_mulai"]'), '');
                 setDate($form.find('[name="tgl_selesai"]'), '');
+                syncKorlapDateRange($form);
             });
 
         $('.btn-edit-project').off('click.projectOffcanvas').on('click.projectOffcanvas', function() {
@@ -615,11 +652,14 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
             $form.find('.js-marketing-project-site').prop('disabled', (data.source || '') === 'api_project_site');
             setSelectValue($form.find('.js-marketing-project-site'), data.marketing_key || '');
             applyMarketingProjectSite($form, data.marketing_key || '', data);
-            setDate($form.find('[name="tgl_mulai"]'), data.tgl_mulai || '');
-            setDate($form.find('[name="tgl_selesai"]'), data.tgl_selesai || '');
+            var marketingData = marketingSiteData[data.marketing_key || ''] || {};
+            setDate($form.find('[name="tgl_mulai"]'), marketingData.tgl_pelaksanaan || marketingData.tgl_mulai ||
+                data.tgl_mulai || '');
+            setDate($form.find('[name="tgl_selesai"]'), marketingData.tgl_selesai || data.tgl_selesai || '');
             $form.find('[name="deskripsi"]').val(data.deskripsi || '');
             renderKorlap($form, data.korlap || []);
             initFlatpickr($form);
+            syncKorlapDateRange($form);
         });
     });
     </script>
