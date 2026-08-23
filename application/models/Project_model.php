@@ -131,6 +131,181 @@ class Project_model extends CI_Model
         return $this->db->delete('tab_project', ['kode_project' => $kode_project]);
     }
 
+    public function deleteMissingApiProjectSites($validKeys)
+    {
+        if (!$this->db->field_exists('source', 'tab_project')
+            || !$this->db->field_exists('marketing_project_id', 'tab_project')
+            || !$this->db->field_exists('marketing_site_id', 'tab_project')) {
+            return 0;
+        }
+
+        $validKeys = array_fill_keys($validKeys, true);
+        $this->db->select('kode_project, site_id, marketing_project_id, marketing_site_id');
+        $this->db->from('tab_project');
+        $this->db->where('source', 'api_project_site');
+        $this->db->where('marketing_project_id IS NOT NULL', null, false);
+        $this->db->where('marketing_site_id IS NOT NULL', null, false);
+        $projects = $this->db->get()->result_array();
+        $deleted = 0;
+
+        foreach ($projects as $project) {
+            $key = ((int) $project['marketing_project_id']) . '|' . ((int) $project['marketing_site_id']);
+            if (isset($validKeys[$key])) {
+                continue;
+            }
+
+            if ($this->deleteApiProjectCascade($project['kode_project'], (int) ($project['site_id'] ?? 0))) {
+                $deleted++;
+            }
+        }
+
+        return $deleted;
+    }
+
+    public function deleteApiProjectCascade($kode_project, $site_id = 0)
+    {
+        $this->deleteProjectUploadFiles($kode_project);
+
+        $this->deleteRowsByProject('tab_budget', 'project', $kode_project);
+        $this->deleteRowsByProject('tab_topup_saldo', 'project', $kode_project);
+        $this->deleteFeeDokterByProject($kode_project);
+        $this->deleteRowsByProject('tab_entertain', 'project', $kode_project);
+        $this->deleteRowsByProject('tab_makan', 'project', $kode_project);
+        $this->deleteRowsByProject('tab_fee_freelance', 'project', $kode_project);
+        $this->deleteRowsByProject('tab_transport', 'project', $kode_project);
+        $this->deleteRowsByProject('tab_penginapan', 'project', $kode_project);
+        $this->deleteRowsByProject('tab_other', 'project', $kode_project);
+        $this->deleteRowsByProject('tab_project_korlap', 'kode_project', $kode_project);
+
+        $this->db->where('kode_project', $kode_project);
+        $deleted = $this->db->delete('tab_project');
+
+        if ($deleted && $site_id > 0) {
+            $this->deleteApiSiteIfUnused($site_id);
+        }
+
+        return $deleted;
+    }
+
+    private function deleteRowsByProject($table, $field, $kode_project)
+    {
+        if (!$this->db->table_exists($table) || !$this->db->field_exists($field, $table)) {
+            return false;
+        }
+
+        return $this->db->delete($table, [$field => $kode_project]);
+    }
+
+    private function deleteFeeDokterByProject($kode_project)
+    {
+        if (!$this->db->table_exists('tab_fee_dokter') || !$this->db->field_exists('project', 'tab_fee_dokter')) {
+            return false;
+        }
+
+        $columns = ['id_fee'];
+        if ($this->db->field_exists('lampiran', 'tab_fee_dokter')) {
+            $columns[] = 'lampiran';
+        }
+
+        $this->db->select(implode(', ', $columns));
+        $this->db->from('tab_fee_dokter');
+        $this->db->where('project', $kode_project);
+        $rows = $this->db->get()->result_array();
+
+        if (empty($rows)) {
+            return true;
+        }
+
+        $feeIds = [];
+        foreach ($rows as $row) {
+            if (!empty($row['lampiran'])) {
+                $this->deleteUploadFile('lampiran', $row['lampiran']);
+            }
+            if (!empty($row['id_fee'])) {
+                $feeIds[] = (int) $row['id_fee'];
+            }
+        }
+
+        if (!empty($feeIds) && $this->db->table_exists('tab_fee_rekening') && $this->db->field_exists('id_fee', 'tab_fee_rekening')) {
+            $this->db->where_in('id_fee', $feeIds);
+            $this->db->delete('tab_fee_rekening');
+        }
+
+        $this->db->where('project', $kode_project);
+        return $this->db->delete('tab_fee_dokter');
+    }
+
+    private function deleteProjectUploadFiles($kode_project)
+    {
+        $configs = [
+            ['table' => 'tab_entertain', 'columns' => ['lampiran'], 'dir' => 'entertain'],
+            ['table' => 'tab_makan', 'columns' => ['lampiran'], 'dir' => 'makan'],
+            ['table' => 'tab_fee_freelance', 'columns' => ['lampiran'], 'dir' => 'freelance'],
+            ['table' => 'tab_transport', 'columns' => ['lampiran', 'stnk'], 'dir' => 'transport'],
+            ['table' => 'tab_penginapan', 'columns' => ['invoice'], 'dir' => 'penginapan'],
+            ['table' => 'tab_other', 'columns' => ['lampiran'], 'dir' => 'other'],
+        ];
+
+        foreach ($configs as $config) {
+            if (!$this->db->table_exists($config['table'])) {
+                continue;
+            }
+            if (!$this->db->field_exists('project', $config['table'])) {
+                continue;
+            }
+
+            $columns = array_values(array_filter($config['columns'], function ($column) use ($config) {
+                return $this->db->field_exists($column, $config['table']);
+            }));
+
+            if (empty($columns)) {
+                continue;
+            }
+
+            $this->db->select(implode(', ', $columns));
+            $this->db->from($config['table']);
+            $this->db->where('project', $kode_project);
+            $rows = $this->db->get()->result_array();
+
+            foreach ($rows as $row) {
+                foreach ($columns as $column) {
+                    $this->deleteUploadFile($config['dir'], $row[$column] ?? '');
+                }
+            }
+        }
+    }
+
+    private function deleteUploadFile($dir, $filename)
+    {
+        $filename = basename((string) $filename);
+        if ($filename === '') {
+            return;
+        }
+
+        $path = FCPATH . 'uploads' . DIRECTORY_SEPARATOR . $dir . DIRECTORY_SEPARATOR . $filename;
+        if (is_file($path)) {
+            @unlink($path);
+        }
+    }
+
+    private function deleteApiSiteIfUnused($site_id)
+    {
+        if (!$this->db->table_exists('tab_site')) {
+            return;
+        }
+
+        $this->db->where('site_id', $site_id);
+        if ($this->db->count_all_results('tab_project') > 0) {
+            return;
+        }
+
+        $this->db->where('id_site', $site_id);
+        if ($this->db->field_exists('source', 'tab_site')) {
+            $this->db->where('source', 'api_project_site');
+        }
+        $this->db->delete('tab_site');
+    }
+
     // ============================
     // Korlap Methods
     // ============================

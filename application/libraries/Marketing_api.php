@@ -186,11 +186,13 @@ class Marketing_api
 
         $insertedProjects = 0;
         $updatedProjects = 0;
+        $deletedProjects = 0;
         $insertedSites = 0;
         $updatedSites = 0;
         $insertedCompanies = 0;
         $updatedCompanies = 0;
         $skipped = 0;
+        $sourceKeys = [];
 
         $this->CI->db->trans_start();
 
@@ -199,6 +201,8 @@ class Marketing_api
                 $skipped++;
                 continue;
             }
+
+            $sourceKeys[] = ((int) $row['marketing_project_id']) . '|' . ((int) $row['marketing_site_id']);
 
             $perusahaan = $this->upsertPerusahaanFromProjectSite($row);
             if (!$perusahaan) {
@@ -225,6 +229,8 @@ class Marketing_api
             $updatedProjects += $project['action'] === 'updated' ? 1 : 0;
         }
 
+        $deletedProjects = $this->CI->project->deleteMissingApiProjectSites(array_values(array_unique($sourceKeys)));
+
         $this->CI->db->trans_complete();
 
         if (!$this->CI->db->trans_status()) {
@@ -233,10 +239,11 @@ class Marketing_api
 
         return [
             'success' => true,
-            'message' => "Sinkronisasi selesai. Project ditambahkan: $insertedProjects, project diperbarui: $updatedProjects, site ditambahkan: $insertedSites, site diperbarui: $updatedSites",
+            'message' => "Sinkronisasi selesai. Project ditambahkan: $insertedProjects, project diperbarui: $updatedProjects, project dihapus: $deletedProjects, site ditambahkan: $insertedSites, site diperbarui: $updatedSites",
             'total' => count($projectSites),
             'inserted_projects' => $insertedProjects,
             'updated_projects' => $updatedProjects,
+            'deleted_projects' => $deletedProjects,
             'inserted_sites' => $insertedSites,
             'updated_sites' => $updatedSites,
             'inserted_companies' => $insertedCompanies,
