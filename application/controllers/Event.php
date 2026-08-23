@@ -19,7 +19,7 @@ class Event extends MY_Controller
 		$id_user = $this->session->userdata('id_user');
 
         $data = [
-            'title'     => 'Cognix Marketing Application | Kegiatan',
+            'title'     => 'Operasional Web App | Kegiatan',
 			'header'    => 'Kegiatan'
         ];
         

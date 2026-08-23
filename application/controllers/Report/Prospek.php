@@ -40,7 +40,7 @@ class Prospek extends CI_Controller
         }
         
         $data = [
-            'title'             => 'Cognix Marketing Application | Report Prospek',
+            'title'             => 'Operasional Web App | Report Prospek',
             'header'            => 'Reports',
             'subheader'         => 'Report Prospek',
             'current_year'      => $current_year,

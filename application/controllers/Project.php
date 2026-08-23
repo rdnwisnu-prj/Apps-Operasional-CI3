@@ -194,6 +194,7 @@ class Project extends CI_Controller
             'financial_summary' => $filteredFinancial['summary'],
             'financial_scope'   => $filteredFinancial['scope'],
             'can_approve_operational' => $this->canApproveOperationalExpense(),
+            'operational_approval_action' => $this->getOperationalApprovalActionForRole(),
         ];
 
         $this->load->view('templates/header', $data);
@@ -469,11 +470,19 @@ class Project extends CI_Controller
 
         $category = $this->input->post('category', true);
         $id = (int) $this->input->post('id', true);
-        $result = $this->project->approveOperationalExpense(
+        $action = $this->getAllowedOperationalApprovalAction($this->input->post('action', true));
+        if (!$action) {
+            $this->session->set_flashdata('error', 'Akses approval tidak sesuai role user.');
+            redirect('Project/detail/' . rawurlencode($kode_project));
+            return;
+        }
+
+        $result = $this->project->processOperationalExpenseStep(
             $category,
             $id,
             $kode_project,
-            (int) $this->session->userdata('id_user')
+            (int) $this->session->userdata('id_user'),
+            $action
         );
 
         if (!empty($result['success'])) {
@@ -518,21 +527,29 @@ class Project extends CI_Controller
         }
 
         if (empty($items)) {
-            $this->session->set_flashdata('error', 'Pilih minimal satu data pending untuk approve');
+            $this->session->set_flashdata('error', 'Pilih minimal satu data untuk diproses');
             redirect('Project/detail/' . rawurlencode($kode_project));
             return;
         }
 
-        $result = $this->project->approveOperationalExpenses(
+        $action = $this->getAllowedOperationalApprovalAction($this->input->post('action', true));
+        if (!$action) {
+            $this->session->set_flashdata('error', 'Akses approval tidak sesuai role user.');
+            redirect('Project/detail/' . rawurlencode($kode_project));
+            return;
+        }
+
+        $result = $this->project->processOperationalExpenseSteps(
             $items,
             $kode_project,
-            (int) $this->session->userdata('id_user')
+            (int) $this->session->userdata('id_user'),
+            $action
         );
 
-        if ($result['approved'] > 0) {
-            $this->session->set_flashdata('flash', 'Approve berhasil: ' . $result['approved'] . ' data');
+        if ($result['processed'] > 0) {
+            $this->session->set_flashdata('flash', $this->getOperationalApprovalActionLabel($action) . ' berhasil: ' . $result['processed'] . ' data');
         } else {
-            $this->session->set_flashdata('error', 'Tidak ada data yang berhasil diapprove');
+            $this->session->set_flashdata('error', 'Tidak ada data yang berhasil diproses');
         }
 
         redirect('Project/detail/' . rawurlencode($kode_project));
@@ -563,7 +580,7 @@ class Project extends CI_Controller
 
     private function canApproveOperationalExpense()
     {
-        return in_array((int) $this->session->userdata('role_id'), [3, 4, 5], true);
+        return $this->getOperationalApprovalActionForRole() !== null;
     }
 
     private function requireOperationalApprover()
@@ -572,8 +589,45 @@ class Project extends CI_Controller
             return true;
         }
 
-        $this->session->set_flashdata('error', 'Akses ditolak. Hanya role 3, 4, dan 5 yang dapat approve pengeluaran.');
+        $this->session->set_flashdata('error', 'Akses ditolak. Role user tidak memiliki akses approval pengeluaran.');
         redirect('Project');
         return false;
+    }
+
+    private function getOperationalApprovalActionForRole()
+    {
+        $roleId = (int) $this->session->userdata('role_id');
+        if ($roleId === 5) {
+            return 'verify';
+        }
+
+        if (in_array($roleId, [3, 4], true)) {
+            return 'validate';
+        }
+
+        if ($roleId === 2) {
+            return 'approve';
+        }
+
+        return null;
+    }
+
+    private function getAllowedOperationalApprovalAction($action)
+    {
+        $allowedAction = $this->getOperationalApprovalActionForRole();
+        $action = (string) $action;
+
+        return $allowedAction !== null && $allowedAction === $action ? $action : null;
+    }
+
+    private function getOperationalApprovalActionLabel($action)
+    {
+        $labels = [
+            'verify' => 'Verifikasi',
+            'validate' => 'Validasi',
+            'approve' => 'Approve',
+        ];
+
+        return $labels[$action] ?? 'Approval';
     }
 }

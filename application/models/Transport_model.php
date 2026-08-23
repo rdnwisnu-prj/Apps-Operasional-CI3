@@ -66,7 +66,7 @@ class Transport_model extends CI_Model
                     'type'       => 'VARCHAR',
                     'constraint' => 50,
                     'null'       => false,
-                    'default'    => 'Mobil',
+                    'default'    => 'Sewa Operasional',
                     'after'      => 'proses',
                 ],
             ]);

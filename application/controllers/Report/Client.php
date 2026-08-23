@@ -41,7 +41,7 @@ class Client extends CI_Controller
         }
 
         $data = [
-            'title'             => 'Cognix Marketing Application | Report Client',
+            'title'             => 'Operasional Web App | Report Client',
             'header'            => 'Reports',
             'subheader'         => 'Report Client',
             'current_year'      => $current_year,

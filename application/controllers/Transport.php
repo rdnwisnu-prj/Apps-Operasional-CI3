@@ -6,7 +6,7 @@ class Transport extends CI_Controller
     private $uploadPath;
     private $imageMaxBytes = 102400;
 
-    private $jenisPengeluaranOptions = ['BBM', 'Toll', 'Parkir', 'Mobil'];
+    private $jenisPengeluaranOptions = ['BBM', 'Toll', 'Parkir', 'Sewa Operasional'];
     private $transportOptions = ['Mobil Operasional', 'Mobil Pribadi', 'Taxi Online', 'Sewa'];
     private $jenisOptions = ['Bis', 'Mobil Penumpang', 'Mobil Barang', 'Motor'];
 
@@ -224,7 +224,7 @@ class Transport extends CI_Controller
 
         $value = trim((string) $value);
         if ($value === '' || !in_array($value, $this->transportOptions, true)) {
-            $this->form_validation->set_message('requiredTransportIfMobil', '{field} wajib dipilih jika Jenis Pengeluaran Mobil.');
+            $this->form_validation->set_message('requiredTransportIfMobil', '{field} wajib dipilih jika Jenis Pengeluaran Sewa Operasional.');
             return false;
         }
 
@@ -239,7 +239,7 @@ class Transport extends CI_Controller
 
         $value = trim((string) $value);
         if ($value === '' || !in_array($value, $this->jenisOptions, true)) {
-            $this->form_validation->set_message('requiredJenisIfMobil', '{field} wajib dipilih jika Jenis Pengeluaran Mobil.');
+            $this->form_validation->set_message('requiredJenisIfMobil', '{field} wajib dipilih jika Jenis Pengeluaran Sewa Operasional.');
             return false;
         }
 
@@ -253,7 +253,20 @@ class Transport extends CI_Controller
         }
 
         if (trim((string) $value) === '') {
-            $this->form_validation->set_message('requiredTipeIfMobil', '{field} wajib diisi jika Jenis Pengeluaran Mobil.');
+            $this->form_validation->set_message('requiredTipeIfMobil', '{field} wajib diisi jika Jenis Pengeluaran Sewa Operasional.');
+            return false;
+        }
+
+        return true;
+    }
+
+    public function validNominal($value)
+    {
+        $value = trim((string) $value);
+        $normalized = str_replace('.', '', $value);
+
+        if ($value === '' || !preg_match('/^\d+(,\d+)?$/', $normalized)) {
+            $this->form_validation->set_message('validNominal', '{field} wajib berupa angka.');
             return false;
         }
 
@@ -284,8 +297,8 @@ class Transport extends CI_Controller
         $this->form_validation->set_rules('project', 'Project', 'required|trim|callback_validAssignedProject');
         $this->form_validation->set_rules('tgl_transport', 'Tanggal Transport', 'required|trim');
         $this->form_validation->set_rules('proses', 'Proses', 'required|trim|callback_validRoleProses');
-        $this->form_validation->set_rules('jenis_pengeluaran', 'Jenis Pengeluaran', 'required|trim|in_list[BBM,Toll,Parkir,Mobil]');
-        $this->form_validation->set_rules('nominal', 'Nominal', 'required|trim|numeric|greater_than_equal_to[0]');
+        $this->form_validation->set_rules('jenis_pengeluaran', 'Jenis Pengeluaran', 'required|trim|in_list[BBM,Toll,Parkir,Sewa Operasional,Mobil]');
+        $this->form_validation->set_rules('nominal', 'Nominal', 'required|trim|callback_validNominal');
         $this->form_validation->set_rules('transport', 'Transport', 'trim|callback_requiredTransportIfMobil');
         $this->form_validation->set_rules('jenis', 'Jenis', 'trim|callback_requiredJenisIfMobil');
         $this->form_validation->set_rules('tipe', 'Merk Kendaraan', 'trim|callback_requiredTipeIfMobil');
@@ -297,7 +310,7 @@ class Transport extends CI_Controller
     private function buildPayload()
     {
         $jenisPengeluaran = $this->input->post('jenis_pengeluaran', true);
-        $isMobil = $jenisPengeluaran === 'Mobil';
+        $isMobil = $this->isMobilExpenseValue($jenisPengeluaran);
         $transport = $isMobil ? $this->input->post('transport', true) : '';
         $isSewa = $isMobil && $transport === 'Sewa';
 
@@ -506,11 +519,16 @@ class Transport extends CI_Controller
 
     private function isMobilExpense()
     {
-        return $this->input->post('jenis_pengeluaran', true) === 'Mobil';
+        return $this->isMobilExpenseValue($this->input->post('jenis_pengeluaran', true));
     }
 
     private function isSewaTransport()
     {
         return $this->isMobilExpense() && $this->input->post('transport', true) === 'Sewa';
+    }
+
+    private function isMobilExpenseValue($value)
+    {
+        return in_array((string) $value, ['Sewa Operasional', 'Mobil'], true);
     }
 }

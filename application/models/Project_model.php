@@ -129,10 +129,39 @@ class Project_model extends CI_Model
                     ],
                 ]);
             }
+
+            foreach (['verified', 'validated'] as $stage) {
+                $byColumn = $stage . '_by';
+                $atColumn = $stage . '_at';
+
+                if (!$this->db->field_exists($byColumn, $table)) {
+                    $this->dbforge->add_column($table, [
+                        $byColumn => [
+                            'type' => 'INT',
+                            'constraint' => 11,
+                            'null' => true,
+                        ],
+                    ]);
+                }
+
+                if (!$this->db->field_exists($atColumn, $table)) {
+                    $this->dbforge->add_column($table, [
+                        $atColumn => [
+                            'type' => 'DATETIME',
+                            'null' => true,
+                        ],
+                    ]);
+                }
+            }
         }
     }
 
     public function approveOperationalExpense($category, $id, $kode_project, $approved_by)
+    {
+        return $this->processOperationalExpenseStep($category, $id, $kode_project, $approved_by, 'approve');
+    }
+
+    public function processOperationalExpenseStep($category, $id, $kode_project, $user_id, $action)
     {
         $this->ensureOperationalApprovalColumns();
 
@@ -147,6 +176,12 @@ class Project_model extends CI_Model
             return ['success' => false, 'message' => 'Tabel pengeluaran tidak valid'];
         }
 
+        $workflow = $this->getOperationalApprovalWorkflow();
+        $step = $workflow[$action] ?? null;
+        if (!$step) {
+            return ['success' => false, 'message' => 'Aksi approval tidak valid'];
+        }
+
         $this->db->select($primaryKey . ', approval_status');
         $row = $this->db->get_where($table, [
             $primaryKey => (int) $id,
@@ -157,28 +192,55 @@ class Project_model extends CI_Model
             return ['success' => false, 'message' => 'Data pengeluaran tidak ditemukan'];
         }
 
-        if (($row['approval_status'] ?? 'pending') === 'approved') {
-            return ['success' => true, 'message' => 'Data sudah approved', 'already_approved' => true];
+        $currentStatus = strtolower((string) ($row['approval_status'] ?? 'pending'));
+        $statusOrder = [
+            'pending' => 0,
+            'verified' => 1,
+            'validated' => 2,
+            'approved' => 3,
+        ];
+
+        if (($statusOrder[$currentStatus] ?? 0) >= $statusOrder[$step['target_status']]) {
+            return [
+                'success' => true,
+                'message' => 'Data sudah ' . strtolower($step['done_label']),
+                'already_processed' => true,
+            ];
         }
+
+        if ($currentStatus !== $step['required_status']) {
+            return [
+                'success' => false,
+                'message' => $step['blocked_message'],
+            ];
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $payload = [
+            'approval_status' => $step['target_status'],
+            $step['by_column'] => (int) $user_id,
+            $step['at_column'] => $now,
+        ];
 
         $this->db->where($primaryKey, (int) $id);
         $this->db->where('project', $kode_project);
-        $updated = $this->db->update($table, [
-            'approval_status' => 'approved',
-            'approved_by' => (int) $approved_by,
-            'approved_at' => date('Y-m-d H:i:s'),
-        ]);
+        $updated = $this->db->update($table, $payload);
 
         return [
             'success' => (bool) $updated,
-            'message' => $updated ? 'Data berhasil diapprove' : 'Data gagal diapprove',
-            'already_approved' => false,
+            'message' => $updated ? 'Data berhasil ' . strtolower($step['done_label']) : 'Data gagal diproses',
+            'already_processed' => false,
         ];
     }
 
     public function approveOperationalExpenses($items, $kode_project, $approved_by)
     {
-        $approved = 0;
+        return $this->processOperationalExpenseSteps($items, $kode_project, $approved_by, 'approve');
+    }
+
+    public function processOperationalExpenseSteps($items, $kode_project, $user_id, $action)
+    {
+        $processed = 0;
         $skipped = 0;
         $failed = 0;
 
@@ -190,12 +252,12 @@ class Project_model extends CI_Model
                 continue;
             }
 
-            $result = $this->approveOperationalExpense($category, $id, $kode_project, $approved_by);
+            $result = $this->processOperationalExpenseStep($category, $id, $kode_project, $user_id, $action);
             if (!empty($result['success'])) {
-                if (!empty($result['already_approved'])) {
+                if (!empty($result['already_processed'])) {
                     $skipped++;
                 } else {
-                    $approved++;
+                    $processed++;
                 }
             } else {
                 $failed++;
@@ -203,10 +265,40 @@ class Project_model extends CI_Model
         }
 
         return [
-            'success' => $approved > 0 && $failed === 0,
-            'approved' => $approved,
+            'success' => $processed > 0 && $failed === 0,
+            'processed' => $processed,
             'skipped' => $skipped,
             'failed' => $failed,
+        ];
+    }
+
+    private function getOperationalApprovalWorkflow()
+    {
+        return [
+            'verify' => [
+                'required_status' => 'pending',
+                'target_status' => 'verified',
+                'by_column' => 'verified_by',
+                'at_column' => 'verified_at',
+                'done_label' => 'Terverifikasi',
+                'blocked_message' => 'Data hanya bisa diverifikasi saat status Pending',
+            ],
+            'validate' => [
+                'required_status' => 'verified',
+                'target_status' => 'validated',
+                'by_column' => 'validated_by',
+                'at_column' => 'validated_at',
+                'done_label' => 'Tervalidasi',
+                'blocked_message' => 'Data harus diverifikasi terlebih dahulu sebelum divalidasi',
+            ],
+            'approve' => [
+                'required_status' => 'validated',
+                'target_status' => 'approved',
+                'by_column' => 'approved_by',
+                'at_column' => 'approved_at',
+                'done_label' => 'Approved',
+                'blocked_message' => 'Data harus divalidasi terlebih dahulu sebelum diapprove',
+            ],
         ];
     }
 
@@ -666,19 +758,32 @@ class Project_model extends CI_Model
         $approvalStatusSelect = $this->db->field_exists('approval_status', $table)
             ? $table . '.approval_status'
             : "'pending'";
-        $hasApprovedBy = $this->db->field_exists('approved_by', $table);
-        $approvedBySelect = $hasApprovedBy ? $table . '.approved_by' : 'NULL';
-        $approvedByNameSelect = $hasApprovedBy ? 'approver.nama' : 'NULL';
-        $approvedAtSelect = $this->db->field_exists('approved_at', $table)
-            ? $table . '.approved_at'
-            : 'NULL';
+        $approvalSelects = [];
+        foreach (['verified', 'validated', 'approved'] as $stage) {
+            $byColumn = $stage . '_by';
+            $atColumn = $stage . '_at';
+            $alias = $stage === 'approved' ? 'approver' : $stage . '_user';
+            $approvalSelects[] = $this->db->field_exists($byColumn, $table)
+                ? $table . '.' . $byColumn . ' AS ' . $byColumn
+                : 'NULL AS ' . $byColumn;
+            $approvalSelects[] = $this->db->field_exists($atColumn, $table)
+                ? $table . '.' . $atColumn . ' AS ' . $atColumn
+                : 'NULL AS ' . $atColumn;
+            $approvalSelects[] = $this->db->field_exists($byColumn, $table)
+                ? $alias . '.nama AS ' . $byColumn . '_name'
+                : 'NULL AS ' . $byColumn . '_name';
+        }
 
-        $this->db->select($config['select'] . ", {$approvalStatusSelect} AS approval_status, {$approvedBySelect} AS approved_by, {$approvedAtSelect} AS approved_at, {$approvedByNameSelect} AS approved_by_name", false);
+        $this->db->select($config['select'] . ", {$approvalStatusSelect} AS approval_status, " . implode(', ', $approvalSelects), false);
         $this->db->from($config['table']);
         $userField = $config['user_field'] ?? 'korlap';
         $this->db->join('tab_user u', 'u.id_user = ' . $config['table'] . '.' . $userField, 'left');
-        if ($hasApprovedBy) {
-            $this->db->join('tab_user approver', 'approver.id_user = ' . $table . '.approved_by', 'left');
+        foreach (['verified', 'validated', 'approved'] as $stage) {
+            $byColumn = $stage . '_by';
+            if ($this->db->field_exists($byColumn, $table)) {
+                $alias = $stage === 'approved' ? 'approver' : $stage . '_user';
+                $this->db->join('tab_user ' . $alias, $alias . '.id_user = ' . $table . '.' . $byColumn, 'left');
+            }
         }
         $this->db->where($config['table'] . '.project', $kode_project);
         $this->db->order_by($config['order'], 'ASC');
@@ -743,10 +848,10 @@ class Project_model extends CI_Model
     private function getOperationalCategoryConfig()
     {
         $transportNameSelect = $this->db->field_exists('jenis_pengeluaran', 'tab_transport')
-            ? "CASE WHEN tab_transport.jenis_pengeluaran = 'Mobil' THEN tab_transport.transport ELSE tab_transport.jenis_pengeluaran END"
+            ? "CASE WHEN tab_transport.jenis_pengeluaran IN ('Mobil', 'Sewa Operasional') THEN tab_transport.transport ELSE tab_transport.jenis_pengeluaran END"
             : 'tab_transport.transport';
         $transportMetaSelect = $this->db->field_exists('jenis_pengeluaran', 'tab_transport')
-            ? "CASE WHEN tab_transport.jenis_pengeluaran = 'Mobil' THEN CONCAT(tab_transport.jenis, ' - ', tab_transport.tipe) ELSE '' END"
+            ? "CASE WHEN tab_transport.jenis_pengeluaran IN ('Mobil', 'Sewa Operasional') THEN CONCAT(tab_transport.jenis, ' - ', tab_transport.tipe) ELSE '' END"
             : "CONCAT(tab_transport.jenis, ' - ', tab_transport.tipe)";
         $transportAmountSelect = $this->db->field_exists('nominal', 'tab_transport') ? 'tab_transport.nominal' : '0';
         $feeDokterProcessSelect = $this->db->table_exists('tab_fee_dokter') && $this->db->field_exists('proses', 'tab_fee_dokter')

@@ -16,15 +16,13 @@ class Project extends CI_Controller
 	
     public function index()
     {
-        $current_year = date('Y');
-
         $id_user = $this->session->userdata('id_user');
         $role_id = $this->session->userdata('role_id');
         
         $data = [
-            'title'             => 'Cognix Marketing Application | Report Project',
-            'header'            => 'Reports',
-            'subheader'         => 'Report Project',
+            'title'             => 'Operasional Web App | Report',
+            'header'            => 'Laporan & Pengaturan',
+            'subheader'         => 'Laporan',
             'current_year'      => $current_year,
             'project_monthly'   => $this->project->getProjectCountByMonth($current_year),
             'current_user_id'   => $id_user,

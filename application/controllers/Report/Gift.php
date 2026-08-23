@@ -12,7 +12,7 @@ class Gift extends CI_Controller
 	public function index()
 	{
         $data = [
-            'title' => 'Cognix Marketing Application | Under Maintenance',
+            'title' => 'Operasional Web App | Under Maintenance',
         ];
 
         $this->load->view('auth/maintenance', $data);

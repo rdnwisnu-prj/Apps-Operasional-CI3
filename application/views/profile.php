@@ -42,8 +42,6 @@
                 </div>
             </div>
 
-
-
             <div class="card">
                 <div class="card-body">
                     <form action="<?= base_url('Profile/update') ?>" method="post" enctype="multipart/form-data"

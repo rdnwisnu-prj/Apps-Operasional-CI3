@@ -31,7 +31,7 @@ class KeluhanAps extends CI_Controller
         }
 
         $data = [
-            'title'             => 'Cognix Marketing Application | Report Keluhan APS',
+            'title'             => 'Operasional Web App | Report Keluhan APS',
             'header'            => 'Reports',
             'subheader'         => 'Report Keluhan APS',
             'current_year'      => $current_year,

@@ -39,7 +39,7 @@ class Konsultasi extends CI_Controller
         }
         
         $data = [
-            'title'             => 'Cognix Marketing Application | Report Konsultasi',
+            'title'             => 'Operasional Web App | Report Konsultasi',
             'header'            => 'Reports',
             'subheader'         => 'Report Konsultasi',
             'current_year'      => $current_year,

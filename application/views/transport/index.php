@@ -5,7 +5,7 @@ $proses_labels = [
     '3' => 'Bongkar Setting',
     '4' => 'Kirim Hasil',
 ];
-$jenis_pengeluaran_options = ['BBM', 'Toll', 'Parkir', 'Mobil'];
+$jenis_pengeluaran_options = ['BBM', 'Toll', 'Parkir', 'Sewa Operasional'];
 $transport_options = ['Mobil Operasional', 'Mobil Pribadi', 'Taxi Online', 'Sewa'];
 $jenis_options = ['Bis', 'Mobil Penumpang', 'Mobil Barang', 'Motor'];
 
@@ -98,7 +98,7 @@ if ($current_role_id === 8) {
                             <td class="text-center">
                                 <?= html_escape($proses_labels[(string) ($row['proses'] ?? '')] ?? '-'); ?></td>
                             <td><span
-                                    class="badge bg-info-subtle text-info"><?= html_escape($row['jenis_pengeluaran'] ?? 'Mobil'); ?></span>
+                                    class="badge bg-info-subtle text-info"><?= html_escape(($row['jenis_pengeluaran'] ?? 'Mobil') === 'Mobil' ? 'Sewa Operasional' : ($row['jenis_pengeluaran'] ?? 'Sewa Operasional')); ?></span>
                             </td>
                             <td class="text-end">Rp
                                 <?= html_escape(number_format((float) ($row['nominal'] ?? 0), 0, ',', '.')); ?></td>
@@ -135,7 +135,7 @@ if ($current_role_id === 8) {
                                                 data-id="<?= (int) $row['id_transport']; ?>"
                                                 data-project="<?= html_escape($row['project'] ?? ''); ?>"
                                                 data-proses="<?= html_escape($row['proses'] ?? ''); ?>"
-                                                data-jenis-pengeluaran="<?= html_escape($row['jenis_pengeluaran'] ?? 'Mobil'); ?>"
+                                                data-jenis-pengeluaran="<?= html_escape(($row['jenis_pengeluaran'] ?? 'Mobil') === 'Mobil' ? 'Sewa Operasional' : ($row['jenis_pengeluaran'] ?? 'Sewa Operasional')); ?>"
                                                 data-nominal="<?= html_escape($row['nominal'] ?? 0); ?>"
                                                 data-tgl-transport="<?= html_escape($row['tgl_transport'] ?? ''); ?>"
                                                 data-transport="<?= html_escape($row['transport'] ?? ''); ?>"
@@ -226,7 +226,8 @@ if ($current_role_id === 8) {
             }
 
             function toggleSewaFields() {
-                var isMobil = $form.find('[name="jenis_pengeluaran"]').val() === 'Mobil';
+                var jenisPengeluaran = $form.find('[name="jenis_pengeluaran"]').val();
+                var isMobil = jenisPengeluaran === 'Sewa Operasional' || jenisPengeluaran === 'Mobil';
                 var isSewa = isMobil && $form.find('[name="transport"]').val() === 'Sewa';
                 $form.find('.js-mobil-fields').toggleClass('d-none', !isMobil);
                 $form.find('.js-mobil-required').prop('required', isMobil);
@@ -279,7 +280,7 @@ if ($current_role_id === 8) {
             $form.find('[name="project"]').val($button.attr('data-project') || '');
             $form.find('[name="proses"]').val($button.attr('data-proses') || '');
             $form.find('[name="jenis_pengeluaran"]').val($button.attr('data-jenis-pengeluaran') ||
-                'Mobil');
+                'Sewa Operasional');
             $form.find('[name="nominal"]').val($button.attr('data-nominal') || '0');
             $form.find('[name="transport"]').val($button.attr('data-transport') || '');
             $form.find('[name="jenis"]').val($button.attr('data-jenis') || '');
