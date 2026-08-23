@@ -8,6 +8,7 @@ $grand_topup = (float) ($finance['grand_topup'] ?? 0);
 $grand_expense = (float) ($finance['grand_expense'] ?? 0);
 $grand_remaining = (float) ($finance['grand_remaining'] ?? 0);
 $financial_scope = $financial_scope ?? 'Semua Proses';
+$canApproveOperational = !empty($can_approve_operational);
 
 if (!function_exists('project_detail_money')) {
     function project_detail_money($value)
@@ -89,6 +90,9 @@ foreach ($process_finance as $processKey => $processRow) {
             'rows' => $categoryRows,
             'total' => (float) ($category['total'] ?? 0),
             'count' => (int) ($category['count'] ?? 0),
+            'pending_count' => count(array_filter($categoryRows, function ($expense) {
+                return strtolower((string) ($expense['approval_status'] ?? 'pending')) !== 'approved';
+            })),
         ];
     }
 }
@@ -159,6 +163,14 @@ foreach ($process_finance as $processKey => $processRow) {
 
 .project-expense-table .item-meta {
     font-size: 12px;
+}
+
+.project-expense-table .approval-meta {
+    font-size: 11px;
+}
+
+.project-expense-table .approval-action {
+    min-width: 96px;
 }
 
 .project-process-tabs {
@@ -497,14 +509,26 @@ foreach ($process_finance as $processKey => $processRow) {
                                     <?php
                                                 $categoryPaneIndex++;
                                                 $categoryPaneId = $processPaneId . '-category-' . preg_replace('/[^a-zA-Z0-9_-]/', '-', (string) $categoryKey);
+                                                $bulkFormId = $categoryPaneId . '-bulk-approve';
                                                 ?>
                                     <div class="tab-pane fade <?= $categoryPaneIndex === 1 ? 'show active' : ''; ?>"
                                         id="<?= html_escape($categoryPaneId); ?>" role="tabpanel">
                                         <div
                                             class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
                                             <h6 class="mb-0"><?= html_escape($category['label']); ?></h6>
-                                            <span class="badge bg-success-subtle text-success">Total
-                                                <?= project_detail_money($category['total']); ?></span>
+                                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                <?php if ($canApproveOperational && (int) ($category['pending_count'] ?? 0) > 0): ?>
+                                                <form id="<?= html_escape($bulkFormId); ?>"
+                                                    action="<?= base_url('Project/approveOperationalBulk/' . rawurlencode($project_detail['kode_project'])); ?>"
+                                                    method="post"></form>
+                                                <button type="submit" form="<?= html_escape($bulkFormId); ?>"
+                                                    class="btn btn-sm btn-primary project-approve-bulk">
+                                                    <i class="ti ti-checks me-1"></i>Approve Terpilih
+                                                </button>
+                                                <?php endif; ?>
+                                                <span class="badge bg-success-subtle text-success">Total
+                                                    <?= project_detail_money($category['total']); ?></span>
+                                            </div>
                                         </div>
 
                                         <?php if (!empty($category['rows'])): ?>
@@ -512,17 +536,46 @@ foreach ($process_finance as $processKey => $processRow) {
                                             <table class="table table-hover align-middle project-expense-table mb-0">
                                                 <thead>
                                                     <tr>
+                                                        <?php if ($canApproveOperational): ?>
+                                                        <th class="text-center" style="width: 4%;">
+                                                            <?php if ((int) ($category['pending_count'] ?? 0) > 0): ?>
+                                                            <input type="checkbox"
+                                                                class="form-check-input project-approve-check-all"
+                                                                data-check-group="<?= html_escape($categoryPaneId); ?>">
+                                                            <?php endif; ?>
+                                                        </th>
+                                                        <?php endif; ?>
                                                         <th style="width: 16%;">Tanggal</th>
                                                         <th>Detail</th>
                                                         <th class="text-end" style="width: 10%;">Qty</th>
                                                         <th class="text-end" style="width: 14%;">Nominal</th>
                                                         <th class="text-end" style="width: 14%;">Total</th>
+                                                        <th style="width: 12%;">Status</th>
                                                         <th style="width: 14%;">Input Oleh</th>
+                                                        <?php if ($canApproveOperational): ?>
+                                                        <th class="text-center" style="width: 10%;">Action</th>
+                                                        <?php endif; ?>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <?php foreach ($category['rows'] as $expense): ?>
+                                                    <?php
+                                                                $approvalStatus = strtolower((string) ($expense['approval_status'] ?? 'pending'));
+                                                                $isApproved = $approvalStatus === 'approved';
+                                                                ?>
                                                     <tr>
+                                                        <?php if ($canApproveOperational): ?>
+                                                        <td class="text-center">
+                                                            <?php if (!$isApproved): ?>
+                                                            <input type="checkbox"
+                                                                class="form-check-input project-approve-check"
+                                                                form="<?= html_escape($bulkFormId ?? ''); ?>"
+                                                                name="items[]"
+                                                                value="<?= html_escape(($expense['category_key'] ?? $categoryKey) . '|' . ($expense['id'] ?? 0)); ?>"
+                                                                data-check-group="<?= html_escape($categoryPaneId); ?>">
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <?php endif; ?>
                                                         <td><?= project_detail_date_range($expense['date_start'] ?? null, $expense['date_end'] ?? null); ?>
                                                         </td>
                                                         <td>
@@ -546,7 +599,43 @@ foreach ($process_finance as $processKey => $processRow) {
                                                         <td class="text-end fw-semibold">
                                                             <?= $expense['amount'] === null ? '-' : project_detail_money($expense['amount']); ?>
                                                         </td>
+                                                        <td>
+                                                            <?php if ($isApproved): ?>
+                                                            <span
+                                                                class="badge bg-success-subtle text-success">Approved</span>
+                                                            <small class="text-muted approval-meta d-block">
+                                                                <?= html_escape($expense['approved_by_name'] ?? '-'); ?>
+                                                                <?php if (!empty($expense['approved_at'])): ?>
+                                                                <span
+                                                                    class="d-block"><?= project_detail_date($expense['approved_at']); ?></span>
+                                                                <?php endif; ?>
+                                                            </small>
+                                                            <?php else: ?>
+                                                            <span
+                                                                class="badge bg-warning-subtle text-warning">Pending</span>
+                                                            <?php endif; ?>
+                                                        </td>
                                                         <td><?= html_escape($expense['created_by'] ?? '-'); ?></td>
+                                                        <?php if ($canApproveOperational): ?>
+                                                        <td class="text-center approval-action">
+                                                            <?php if (!$isApproved): ?>
+                                                            <form class="d-inline project-approve-single"
+                                                                action="<?= base_url('Project/approveOperational/' . rawurlencode($project_detail['kode_project'])); ?>"
+                                                                method="post">
+                                                                <input type="hidden" name="category"
+                                                                    value="<?= html_escape($expense['category_key'] ?? $categoryKey); ?>">
+                                                                <input type="hidden" name="id"
+                                                                    value="<?= (int) ($expense['id'] ?? 0); ?>">
+                                                                <button type="submit"
+                                                                    class="btn btn-sm btn-outline-success">
+                                                                    <i class="ti ti-check me-1"></i>Approve
+                                                                </button>
+                                                            </form>
+                                                            <?php else: ?>
+                                                            <span class="text-muted">-</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <?php endif; ?>
                                                     </tr>
                                                     <?php endforeach; ?>
                                                 </tbody>
@@ -578,3 +667,94 @@ foreach ($process_finance as $processKey => $processRow) {
 
 
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.project-approve-check-all').forEach(function(checkAll) {
+        checkAll.addEventListener('change', function() {
+            var group = checkAll.getAttribute('data-check-group');
+            document.querySelectorAll('.project-approve-check[data-check-group="' + group + '"]').forEach(function(item) {
+                item.checked = checkAll.checked;
+            });
+        });
+    });
+
+    document.querySelectorAll('.project-approve-bulk').forEach(function(button) {
+        button.addEventListener('click', function(event) {
+            var form = document.getElementById(button.getAttribute('form'));
+            if (!form) {
+                return;
+            }
+
+            var checked = document.querySelectorAll('.project-approve-check[form="' + form.id + '"]:checked');
+            if (!checked.length) {
+                event.preventDefault();
+                if (window.Swal) {
+                    Swal.fire('Data belum dipilih', 'Pilih minimal satu data pending untuk approve.', 'warning');
+                } else {
+                    alert('Pilih minimal satu data pending untuk approve.');
+                }
+                return;
+            }
+
+            if (form.dataset.confirmed === '1') {
+                return;
+            }
+
+            event.preventDefault();
+            var submitForm = function() {
+                form.dataset.confirmed = '1';
+                form.submit();
+            };
+
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'Approve data terpilih?',
+                    text: checked.length + ' data akan diubah menjadi Approved.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Approve',
+                    cancelButtonText: 'Batal'
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        submitForm();
+                    }
+                });
+            } else if (confirm('Approve ' + checked.length + ' data terpilih?')) {
+                submitForm();
+            }
+        });
+    });
+
+    document.querySelectorAll('.project-approve-single').forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (form.dataset.confirmed === '1') {
+                return;
+            }
+
+            event.preventDefault();
+            var submitForm = function() {
+                form.dataset.confirmed = '1';
+                form.submit();
+            };
+
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'Approve data ini?',
+                    text: 'Status akan berubah menjadi Approved.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Approve',
+                    cancelButtonText: 'Batal'
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        submitForm();
+                    }
+                });
+            } else if (confirm('Approve data ini?')) {
+                submitForm();
+            }
+        });
+    });
+});
+</script>

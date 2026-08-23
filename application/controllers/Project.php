@@ -193,6 +193,7 @@ class Project extends CI_Controller
             'korlap'            => $this->project->getKorlapByProject($kode_project),
             'financial_summary' => $filteredFinancial['summary'],
             'financial_scope'   => $filteredFinancial['scope'],
+            'can_approve_operational' => $this->canApproveOperationalExpense(),
         ];
 
         $this->load->view('templates/header', $data);
@@ -447,6 +448,96 @@ class Project extends CI_Controller
         redirect('Project/detail/' . rawurlencode($kode_project));
     }
 
+    public function approveOperational($kode_project = null)
+    {
+        if (!$this->requireOperationalApprover()) {
+            return;
+        }
+
+        if ($this->input->method(TRUE) !== 'POST') {
+            redirect('Project/detail/' . rawurlencode((string) $kode_project));
+            return;
+        }
+
+        $kode_project = $kode_project ? urldecode($kode_project) : null;
+        $project = $kode_project ? $this->project->getProjectById($kode_project) : null;
+        if (!$project) {
+            $this->session->set_flashdata('error', 'Data project tidak ditemukan');
+            redirect('Project');
+            return;
+        }
+
+        $category = $this->input->post('category', true);
+        $id = (int) $this->input->post('id', true);
+        $result = $this->project->approveOperationalExpense(
+            $category,
+            $id,
+            $kode_project,
+            (int) $this->session->userdata('id_user')
+        );
+
+        if (!empty($result['success'])) {
+            $this->session->set_flashdata('flash', $result['message']);
+        } else {
+            $this->session->set_flashdata('error', $result['message']);
+        }
+
+        redirect('Project/detail/' . rawurlencode($kode_project));
+    }
+
+    public function approveOperationalBulk($kode_project = null)
+    {
+        if (!$this->requireOperationalApprover()) {
+            return;
+        }
+
+        if ($this->input->method(TRUE) !== 'POST') {
+            redirect('Project/detail/' . rawurlencode((string) $kode_project));
+            return;
+        }
+
+        $kode_project = $kode_project ? urldecode($kode_project) : null;
+        $project = $kode_project ? $this->project->getProjectById($kode_project) : null;
+        if (!$project) {
+            $this->session->set_flashdata('error', 'Data project tidak ditemukan');
+            redirect('Project');
+            return;
+        }
+
+        $items = [];
+        foreach ((array) $this->input->post('items') as $item) {
+            $parts = explode('|', (string) $item);
+            if (count($parts) !== 2) {
+                continue;
+            }
+
+            $items[] = [
+                'category' => $parts[0],
+                'id' => (int) $parts[1],
+            ];
+        }
+
+        if (empty($items)) {
+            $this->session->set_flashdata('error', 'Pilih minimal satu data pending untuk approve');
+            redirect('Project/detail/' . rawurlencode($kode_project));
+            return;
+        }
+
+        $result = $this->project->approveOperationalExpenses(
+            $items,
+            $kode_project,
+            (int) $this->session->userdata('id_user')
+        );
+
+        if ($result['approved'] > 0) {
+            $this->session->set_flashdata('flash', 'Approve berhasil: ' . $result['approved'] . ' data');
+        } else {
+            $this->session->set_flashdata('error', 'Tidak ada data yang berhasil diapprove');
+        }
+
+        redirect('Project/detail/' . rawurlencode($kode_project));
+    }
+
     public function getSites()
     {
         $perusahaan_id = $this->input->get('perusahaan_id');
@@ -466,6 +557,22 @@ class Project extends CI_Controller
         }
 
         $this->session->set_flashdata('error', 'Akses ditolak. Korlap hanya dapat melihat detail project.');
+        redirect('Project');
+        return false;
+    }
+
+    private function canApproveOperationalExpense()
+    {
+        return in_array((int) $this->session->userdata('role_id'), [3, 4, 5], true);
+    }
+
+    private function requireOperationalApprover()
+    {
+        if ($this->canApproveOperationalExpense()) {
+            return true;
+        }
+
+        $this->session->set_flashdata('error', 'Akses ditolak. Hanya role 3, 4, dan 5 yang dapat approve pengeluaran.');
         redirect('Project');
         return false;
     }

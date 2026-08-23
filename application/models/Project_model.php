@@ -90,6 +90,126 @@ class Project_model extends CI_Model
         return $this->db->count_all_results() > 0;
     }
 
+    public function ensureOperationalApprovalColumns()
+    {
+        $this->load->dbforge();
+
+        foreach ($this->getOperationalCategoryConfig() as $config) {
+            $table = $config['table'];
+            if (!$this->db->table_exists($table)) {
+                continue;
+            }
+
+            if (!$this->db->field_exists('approval_status', $table)) {
+                $this->dbforge->add_column($table, [
+                    'approval_status' => [
+                        'type' => 'VARCHAR',
+                        'constraint' => 20,
+                        'null' => false,
+                        'default' => 'pending',
+                    ],
+                ]);
+            }
+
+            if (!$this->db->field_exists('approved_by', $table)) {
+                $this->dbforge->add_column($table, [
+                    'approved_by' => [
+                        'type' => 'INT',
+                        'constraint' => 11,
+                        'null' => true,
+                    ],
+                ]);
+            }
+
+            if (!$this->db->field_exists('approved_at', $table)) {
+                $this->dbforge->add_column($table, [
+                    'approved_at' => [
+                        'type' => 'DATETIME',
+                        'null' => true,
+                    ],
+                ]);
+            }
+        }
+    }
+
+    public function approveOperationalExpense($category, $id, $kode_project, $approved_by)
+    {
+        $this->ensureOperationalApprovalColumns();
+
+        $config = $this->getOperationalCategoryConfig()[$category] ?? null;
+        if (!$config) {
+            return ['success' => false, 'message' => 'Kategori pengeluaran tidak valid'];
+        }
+
+        $table = $config['table'];
+        $primaryKey = $config['primary_key'];
+        if (!$this->db->table_exists($table) || !$this->db->field_exists($primaryKey, $table) || !$this->db->field_exists('project', $table)) {
+            return ['success' => false, 'message' => 'Tabel pengeluaran tidak valid'];
+        }
+
+        $this->db->select($primaryKey . ', approval_status');
+        $row = $this->db->get_where($table, [
+            $primaryKey => (int) $id,
+            'project' => $kode_project,
+        ])->row_array();
+
+        if (!$row) {
+            return ['success' => false, 'message' => 'Data pengeluaran tidak ditemukan'];
+        }
+
+        if (($row['approval_status'] ?? 'pending') === 'approved') {
+            return ['success' => true, 'message' => 'Data sudah approved', 'already_approved' => true];
+        }
+
+        $this->db->where($primaryKey, (int) $id);
+        $this->db->where('project', $kode_project);
+        $updated = $this->db->update($table, [
+            'approval_status' => 'approved',
+            'approved_by' => (int) $approved_by,
+            'approved_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return [
+            'success' => (bool) $updated,
+            'message' => $updated ? 'Data berhasil diapprove' : 'Data gagal diapprove',
+            'already_approved' => false,
+        ];
+    }
+
+    public function approveOperationalExpenses($items, $kode_project, $approved_by)
+    {
+        $approved = 0;
+        $skipped = 0;
+        $failed = 0;
+
+        foreach ($items as $item) {
+            $category = $item['category'] ?? '';
+            $id = (int) ($item['id'] ?? 0);
+            if ($category === '' || $id <= 0) {
+                $skipped++;
+                continue;
+            }
+
+            $result = $this->approveOperationalExpense($category, $id, $kode_project, $approved_by);
+            if (!empty($result['success'])) {
+                if (!empty($result['already_approved'])) {
+                    $skipped++;
+                } else {
+                    $approved++;
+                }
+            } else {
+                $failed++;
+            }
+        }
+
+        return [
+            'success' => $approved > 0 && $failed === 0,
+            'approved' => $approved,
+            'skipped' => $skipped,
+            'failed' => $failed,
+        ];
+    }
+
     public function generateKode()
     {
         $prefix = 'PRJ';
@@ -394,6 +514,8 @@ class Project_model extends CI_Model
 
     public function getProjectFinancialSummary($kode_project)
     {
+        $this->ensureOperationalApprovalColumns();
+
         $processLabels = $this->getProcessLabels();
         $categoryConfig = $this->getOperationalCategoryConfig();
         $summary = [
@@ -540,10 +662,24 @@ class Project_model extends CI_Model
             return [];
         }
 
-        $this->db->select($config['select'], false);
+        $table = $config['table'];
+        $approvalStatusSelect = $this->db->field_exists('approval_status', $table)
+            ? $table . '.approval_status'
+            : "'pending'";
+        $hasApprovedBy = $this->db->field_exists('approved_by', $table);
+        $approvedBySelect = $hasApprovedBy ? $table . '.approved_by' : 'NULL';
+        $approvedByNameSelect = $hasApprovedBy ? 'approver.nama' : 'NULL';
+        $approvedAtSelect = $this->db->field_exists('approved_at', $table)
+            ? $table . '.approved_at'
+            : 'NULL';
+
+        $this->db->select($config['select'] . ", {$approvalStatusSelect} AS approval_status, {$approvedBySelect} AS approved_by, {$approvedAtSelect} AS approved_at, {$approvedByNameSelect} AS approved_by_name", false);
         $this->db->from($config['table']);
         $userField = $config['user_field'] ?? 'korlap';
         $this->db->join('tab_user u', 'u.id_user = ' . $config['table'] . '.' . $userField, 'left');
+        if ($hasApprovedBy) {
+            $this->db->join('tab_user approver', 'approver.id_user = ' . $table . '.approved_by', 'left');
+        }
         $this->db->where($config['table'] . '.project', $kode_project);
         $this->db->order_by($config['order'], 'ASC');
         return $this->db->get()->result_array();
@@ -622,18 +758,21 @@ class Project_model extends CI_Model
             'entertain' => [
                 'label' => 'Entertain',
                 'table' => 'tab_entertain',
+                'primary_key' => 'id_entertain',
                 'order' => 'tab_entertain.tgl_mulai',
                 'select' => "tab_entertain.id_entertain AS id, tab_entertain.proses, tab_entertain.tgl_mulai AS date_start, tab_entertain.tgl_selesai AS date_end, tab_entertain.nama_karyawan AS item_name, CONCAT('Jumlah hari: ', tab_entertain.j_hari) AS item_meta, tab_entertain.j_hari AS quantity, tab_entertain.nominal AS unit_price, NULL AS extra_amount, tab_entertain.total AS amount, tab_entertain.keterangan, tab_entertain.lampiran, u.nama AS created_by",
             ],
             'makan' => [
                 'label' => 'Makan',
                 'table' => 'tab_makan',
+                'primary_key' => 'id_makan',
                 'order' => 'tab_makan.tgl_makan',
                 'select' => "tab_makan.id_makan AS id, tab_makan.proses, tab_makan.tgl_makan AS date_start, NULL AS date_end, 'Makan' AS item_name, CONCAT('Jumlah: ', tab_makan.jumlah) AS item_meta, tab_makan.jumlah AS quantity, tab_makan.nominal AS unit_price, NULL AS extra_amount, tab_makan.total AS amount, tab_makan.keterangan, tab_makan.lampiran, u.nama AS created_by",
             ],
             'fee_dokter' => [
                 'label' => 'Fee Dokter',
                 'table' => 'tab_fee_dokter',
+                'primary_key' => 'id_fee',
                 'order' => 'tab_fee_dokter.tgl_project',
                 'user_field' => 'user_id',
                 'select' => "tab_fee_dokter.id_fee AS id, {$feeDokterProcessSelect} AS proses, tab_fee_dokter.tgl_project AS date_start, NULL AS date_end, tab_fee_dokter.nama_dokter AS item_name, CONCAT_WS(' | ', NULLIF(tab_fee_dokter.spesialis, ''), CASE WHEN tab_fee_dokter.pph21 = 1 THEN 'PPH21' ELSE 'Non PPH21' END, CASE WHEN COALESCE(tab_fee_dokter.biaya_tambahan, 0) > 0 THEN CONCAT('Tambahan: ', COALESCE(tab_fee_dokter.jenis_biaya_tambahan, '-'), ' ', COALESCE(tab_fee_dokter.biaya_tambahan, 0)) ELSE NULL END) AS item_meta, tab_fee_dokter.jumlah_hari AS quantity, tab_fee_dokter.fee AS unit_price, tab_fee_dokter.biaya_tambahan AS extra_amount, {$feeDokterAmountSelect} AS amount, tab_fee_dokter.keterangan, tab_fee_dokter.lampiran, u.nama AS created_by",
@@ -641,24 +780,28 @@ class Project_model extends CI_Model
             'freelance' => [
                 'label' => 'Freelance',
                 'table' => 'tab_fee_freelance',
+                'primary_key' => 'id_freelance',
                 'order' => 'tab_fee_freelance.tgl_fee',
                 'select' => "tab_fee_freelance.id_freelance AS id, tab_fee_freelance.proses, tab_fee_freelance.tgl_fee AS date_start, NULL AS date_end, tab_fee_freelance.jobdesk AS item_name, CONCAT(tab_fee_freelance.jumlah_orang, ' orang x ', tab_fee_freelance.jumlah_hari, ' hari') AS item_meta, tab_fee_freelance.jumlah_orang AS quantity, tab_fee_freelance.fee AS unit_price, tab_fee_freelance.biaya_tambahan AS extra_amount, tab_fee_freelance.total AS amount, tab_fee_freelance.keterangan, tab_fee_freelance.lampiran, u.nama AS created_by",
             ],
             'transport' => [
                 'label' => 'Transport',
                 'table' => 'tab_transport',
+                'primary_key' => 'id_transport',
                 'order' => 'tab_transport.tgl_transport',
                 'select' => "tab_transport.id_transport AS id, tab_transport.proses, tab_transport.tgl_transport AS date_start, NULL AS date_end, {$transportNameSelect} AS item_name, {$transportMetaSelect} AS item_meta, NULL AS quantity, {$transportAmountSelect} AS unit_price, NULL AS extra_amount, {$transportAmountSelect} AS amount, tab_transport.keterangan, tab_transport.lampiran, u.nama AS created_by",
             ],
             'penginapan' => [
                 'label' => 'Penginapan',
                 'table' => 'tab_penginapan',
+                'primary_key' => 'id_penginapan',
                 'order' => 'tab_penginapan.tgl_checkin',
                 'select' => "tab_penginapan.id_penginapan AS id, tab_penginapan.proses, tab_penginapan.tgl_checkin AS date_start, tab_penginapan.tgl_checkout AS date_end, tab_penginapan.nama_hunian AS item_name, tab_penginapan.tipe_hunian AS item_meta, tab_penginapan.jumlah_hari AS quantity, tab_penginapan.nominal AS unit_price, NULL AS extra_amount, tab_penginapan.nominal AS amount, tab_penginapan.keterangan, tab_penginapan.invoice AS lampiran, u.nama AS created_by",
             ],
             'other' => [
                 'label' => 'Other',
                 'table' => 'tab_other',
+                'primary_key' => 'id_other',
                 'order' => 'tab_other.tanggal',
                 'select' => "tab_other.id_other AS id, tab_other.proses, tab_other.tanggal AS date_start, NULL AS date_end, tab_other.kebutuhan AS item_name, '' AS item_meta, NULL AS quantity, tab_other.nominal AS unit_price, NULL AS extra_amount, tab_other.nominal AS amount, tab_other.keterangan, tab_other.lampiran, u.nama AS created_by",
             ],
