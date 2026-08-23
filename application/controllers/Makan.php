@@ -174,7 +174,7 @@ class Makan extends CI_Controller
 
     private function setRules()
     {
-        $this->form_validation->set_rules('project', 'Project', 'required|trim');
+        $this->form_validation->set_rules('project', 'Project', 'required|trim|callback_validAssignedProject');
         $this->form_validation->set_rules('tgl_makan', 'Tanggal', 'required|trim|callback_validProjectDate');
         $this->form_validation->set_rules('proses', 'Proses', 'required|trim|callback_validRoleProses');
         $this->form_validation->set_rules('jumlah', 'Jumlah', 'required|numeric');
@@ -357,6 +357,16 @@ class Makan extends CI_Controller
         }
 
         $this->form_validation->set_message('validRoleProses', 'Pilihan proses tidak sesuai dengan akses user.');
+        return false;
+    }
+
+    public function validAssignedProject($project)
+    {
+        if ($this->makan->canUseProject($project)) {
+            return true;
+        }
+
+        $this->form_validation->set_message('validAssignedProject', 'Project tidak tersedia atau belum diassign ke user ini.');
         return false;
     }
 

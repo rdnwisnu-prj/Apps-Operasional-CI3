@@ -24,13 +24,22 @@ class Entertain_model extends CI_Model
         $this->db->select('tab_project.kode_project, tab_project.nama_project, tab_project.tgl_mulai, tab_project.tgl_selesai, tab_project.site_id, tab_site.provinsi, tab_site.kota');
         $this->db->from('tab_project');
         $this->db->join('tab_site', 'tab_site.id_site = tab_project.site_id', 'left');
+        $this->applyKorlapProjectFilter();
         $this->db->order_by('tab_project.nama_project', 'ASC');
         return $this->db->get()->result_array();
     }
 
     public function getProjectByKode($kode_project)
     {
-        return $this->db->get_where('tab_project', ['kode_project' => $kode_project])->row_array();
+        $this->db->from('tab_project');
+        $this->db->where('tab_project.kode_project', $kode_project);
+        $this->applyKorlapProjectFilter();
+        return $this->db->get()->row_array();
+    }
+
+    public function canUseProject($kode_project)
+    {
+        return (bool) $this->getProjectByKode($kode_project);
     }
 
     public function storeData($data)
@@ -114,5 +123,16 @@ class Entertain_model extends CI_Model
 
         // Tier 5: Rp 110.000 - Luar Jawa
         return 110000;
+    }
+
+    private function applyKorlapProjectFilter()
+    {
+        if ((int) $this->session->userdata('role_id') !== 8) {
+            return;
+        }
+
+        $this->db->join('tab_project_korlap k', 'k.kode_project = tab_project.kode_project', 'inner');
+        $this->db->where('k.user_id', (int) $this->session->userdata('id_user'));
+        $this->db->distinct();
     }
 }

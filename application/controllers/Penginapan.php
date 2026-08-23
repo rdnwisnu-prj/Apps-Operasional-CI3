@@ -216,7 +216,7 @@ class Penginapan extends CI_Controller
 
     private function setRules()
     {
-        $this->form_validation->set_rules('project', 'Project', 'required|trim');
+        $this->form_validation->set_rules('project', 'Project', 'required|trim|callback_validAssignedProject');
         $this->form_validation->set_rules('proses', 'Proses', 'required|trim|callback_validRoleProses');
         $this->form_validation->set_rules('tgl_checkin', 'Tanggal Checkin', 'required|trim|callback_validProjectStay');
         $this->form_validation->set_rules('tgl_checkout', 'Tanggal Checkout', 'required|trim');
@@ -411,6 +411,16 @@ class Penginapan extends CI_Controller
         }
 
         $this->form_validation->set_message('validRoleProses', 'Pilihan proses tidak sesuai dengan akses user.');
+        return false;
+    }
+
+    public function validAssignedProject($project)
+    {
+        if ($this->penginapan->canUseProject($project)) {
+            return true;
+        }
+
+        $this->form_validation->set_message('validAssignedProject', 'Project tidak tersedia atau belum diassign ke user ini.');
         return false;
     }
 
