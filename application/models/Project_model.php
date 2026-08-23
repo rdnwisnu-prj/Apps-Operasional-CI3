@@ -542,7 +542,8 @@ class Project_model extends CI_Model
 
         $this->db->select($config['select'], false);
         $this->db->from($config['table']);
-        $this->db->join('tab_user u', 'u.id_user = ' . $config['table'] . '.korlap', 'left');
+        $userField = $config['user_field'] ?? 'korlap';
+        $this->db->join('tab_user u', 'u.id_user = ' . $config['table'] . '.' . $userField, 'left');
         $this->db->where($config['table'] . '.project', $kode_project);
         $this->db->order_by($config['order'], 'ASC');
         return $this->db->get()->result_array();
@@ -612,6 +613,10 @@ class Project_model extends CI_Model
             ? "CASE WHEN tab_transport.jenis_pengeluaran = 'Mobil' THEN CONCAT(tab_transport.jenis, ' - ', tab_transport.tipe) ELSE '' END"
             : "CONCAT(tab_transport.jenis, ' - ', tab_transport.tipe)";
         $transportAmountSelect = $this->db->field_exists('nominal', 'tab_transport') ? 'tab_transport.nominal' : '0';
+        $feeDokterProcessSelect = $this->db->table_exists('tab_fee_dokter') && $this->db->field_exists('proses', 'tab_fee_dokter')
+            ? 'tab_fee_dokter.proses'
+            : "'2'";
+        $feeDokterAmountSelect = "CASE WHEN tab_fee_dokter.pph21 = 1 THEN COALESCE(tab_fee_dokter.total, 0) - COALESCE(tab_fee_dokter.jumlah_pph, 0) ELSE COALESCE(tab_fee_dokter.total, 0) + COALESCE(tab_fee_dokter.jumlah_nopph, 0) END";
 
         return [
             'entertain' => [
@@ -625,6 +630,13 @@ class Project_model extends CI_Model
                 'table' => 'tab_makan',
                 'order' => 'tab_makan.tgl_makan',
                 'select' => "tab_makan.id_makan AS id, tab_makan.proses, tab_makan.tgl_makan AS date_start, NULL AS date_end, 'Makan' AS item_name, CONCAT('Jumlah: ', tab_makan.jumlah) AS item_meta, tab_makan.jumlah AS quantity, tab_makan.nominal AS unit_price, NULL AS extra_amount, tab_makan.total AS amount, tab_makan.keterangan, tab_makan.lampiran, u.nama AS created_by",
+            ],
+            'fee_dokter' => [
+                'label' => 'Fee Dokter',
+                'table' => 'tab_fee_dokter',
+                'order' => 'tab_fee_dokter.tgl_project',
+                'user_field' => 'user_id',
+                'select' => "tab_fee_dokter.id_fee AS id, {$feeDokterProcessSelect} AS proses, tab_fee_dokter.tgl_project AS date_start, NULL AS date_end, tab_fee_dokter.nama_dokter AS item_name, CONCAT_WS(' | ', NULLIF(tab_fee_dokter.spesialis, ''), CASE WHEN tab_fee_dokter.pph21 = 1 THEN 'PPH21' ELSE 'Non PPH21' END, CASE WHEN COALESCE(tab_fee_dokter.biaya_tambahan, 0) > 0 THEN CONCAT('Tambahan: ', COALESCE(tab_fee_dokter.jenis_biaya_tambahan, '-'), ' ', COALESCE(tab_fee_dokter.biaya_tambahan, 0)) ELSE NULL END) AS item_meta, tab_fee_dokter.jumlah_hari AS quantity, tab_fee_dokter.fee AS unit_price, tab_fee_dokter.biaya_tambahan AS extra_amount, {$feeDokterAmountSelect} AS amount, tab_fee_dokter.keterangan, tab_fee_dokter.lampiran, u.nama AS created_by",
             ],
             'freelance' => [
                 'label' => 'Freelance',
