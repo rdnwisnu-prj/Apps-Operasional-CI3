@@ -379,7 +379,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                         <div class="col-md-6 mb-3">
                             <label for="edit_tgl_selesai" class="form-label">Tanggal Selesai</label>
                             <input type="text" class="form-control js-project-date" id="edit_tgl_selesai"
-                                autocomplete="off" readonly>
+                                name="tgl_selesai" autocomplete="off" readonly>
                         </div>
                     </div>
                     <div class="mb-3">
