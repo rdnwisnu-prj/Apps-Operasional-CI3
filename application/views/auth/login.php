@@ -4,122 +4,100 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?= html_escape($judul); ?></title>
+    <title><?= html_escape($title); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="shortcut icon" href="<?= base_url() ?>assets/img/logo/favicon.png">
-    <link rel="stylesheet" href="<?= base_url() ?>assets/libs/sweetalert2/sweetalert2.min.css">
-    <link rel="stylesheet" href="<?= base_url() ?>assets/template/crms/assets/css/bootstrap.min.css">
-    <link rel="stylesheet"
-        href="<?= base_url() ?>assets/template/crms/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="<?= base_url() ?>assets/template/crms/assets/css/style.css" id="app-style">
-    <link rel="stylesheet" href="<?= base_url() ?>assets/css/style.css">
-    <link rel="stylesheet" href="<?= base_url() ?>assets/css/login.css">
+    <link rel="shortcut icon" href="<?= base_url('assets/img/logo/favicon.png'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/libs/sweetalert2/sweetalert2.min.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/template/crms/assets/css/bootstrap.min.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/template/crms/assets/plugins/icons/remix/remixicon.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/login.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/custom.css'); ?>">
 </head>
 
-<body class="login-page">
-    <?php if ($this->session->flashdata('flash')): ?>
-    <div class="flash-login" data-flashdata="<?= $this->session->flashdata('flash'); ?>"></div>
-    <?php endif; ?>
+<body class="login-body">
+    <main class="login-page">
 
-    <?php if ($this->session->flashdata('error')): ?>
-    <div class="flash-failed" data-flashdata="<?= $this->session->flashdata('error'); ?>"></div>
-    <?php endif; ?>
+        <?php if ($this->session->flashdata('flash')): ?>
+        <div class="flash-logout" data-flashdata="<?= $this->session->flashdata('flash'); ?>"></div>
+        <?php endif; ?>
 
-    <main class="login-shell">
-        <section class="login-visual" aria-label="Apps Operasional">
-            <div class="login-visual__overlay"></div>
-            <div class="login-visual__top">
-                <img src="<?= base_url() ?>assets/img/logo/transparent.png" alt="Cakra Corp" class="login-brand__logo">
-                <span>Apps Operasional</span>
-            </div>
-            <div class="login-visual__content">
-                <span class="login-kicker">Project Finance Control</span>
+        <?php if ($this->session->flashdata('error')): ?>
+        <div class="flash-failed" data-flashdata="<?= $this->session->flashdata('error'); ?>"></div>
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('flash')): ?>
+        <div class="flash-login" data-flashdata="<?= $this->session->flashdata('flash'); ?>"></div>
+        <?php endif; ?>
+
+        <section class="login-shell">
+            <div class="login-hero">
+                <div class="login-badge"><i class="ri-line-chart-line"></i> Operational Management System</div>
                 <h1>Operasional project dalam satu ruang kerja.</h1>
                 <p>Kontrol biaya, lampiran, dan laporan operasional project dengan akses internal Cakra Corp.</p>
-                <div class="login-visual__meta" aria-label="Cakupan modul">
-                    <div>
-                        <i class="ti ti-report-money"></i>
-                        <span>Finance</span>
-                    </div>
-                    <div>
-                        <i class="ti ti-briefcase"></i>
-                        <span>Project</span>
-                    </div>
-                    <div>
-                        <i class="ti ti-file-analytics"></i>
-                        <span>Report</span>
-                    </div>
+                <div class="login-stats">
+                    <div class="login-stat"><strong>Finance</strong><span>Monitoring Keuangan Operasional</span></div>
+                    <div class="login-stat"><strong>Project</strong><span>Data Operasional Project</span></div>
+                    <div class="login-stat"><strong>Report</strong><span>Akses khusus internal</span></div>
                 </div>
             </div>
-        </section>
-
-        <section class="login-panel" aria-label="Form login">
-            <div class="login-panel__inner">
-                <div class="login-panel__header">
-                    <img src="<?= base_url() ?>assets/img/logo/transparent.png" alt="Cakra Corp"
-                        class="login-panel__logo">
-                    <span class="login-panel__eyebrow">Secure Internal Access</span>
+            <div class="login-card">
+                <div class="text-center">
+                    <img src="<?= base_url('assets/img/logo/transparent.png'); ?>" class="login-logo mx-auto"
+                        alt="Cakra Corp">
                     <h2>Selamat Datang</h2>
-                    <p>Lanjutkan ke dashboard Apps Operasional.</p>
+                    <p class="subtitle">Masuk untuk mengakses dashboard Aplikasi Operasional.</p>
                 </div>
-
                 <?php if (validation_errors()): ?>
                 <div class="login-alert" role="alert">
-                    <i class="ti ti-alert-circle"></i>
+                    <i class="ri-error-warning-line"></i>
                     <div><?= validation_errors('<span>', '</span>'); ?></div>
                 </div>
                 <?php endif; ?>
-
-                <form action="<?= base_url('Auth') ?>" method="post" class="login-form" autocomplete="on">
-                    <div class="login-field">
-                        <label for="username">Username / NIK</label>
-                        <div class="login-input">
-                            <i class="ti ti-user-circle"></i>
-                            <input type="text" id="username" name="username" value="<?= set_value('username') ?>"
-                                placeholder="Masukkan username atau NIK" autocomplete="username" required autofocus>
+                <form action="<?= base_url('Auth') ?>" method="post" autocomplete="on">
+                    <div class="mb-3">
+                        <label class="form-label-modern" for="username">Username</label>
+                        <div class="input-wrap">
+                            <i class="ri-user-3-line input-icon"></i>
+                            <input type="text" class="form-control-modern" id="username" name="username"
+                                value="<?= set_value('username') ?>" placeholder="Masukkan username"
+                                autocomplete="username" required autofocus>
                         </div>
                     </div>
-
-                    <div class="login-field">
-                        <div class="login-label-row">
-                            <label for="password">Password</label>
-                        </div>
-                        <div class="login-input pass-group">
-                            <i class="ti ti-lock-password"></i>
-                            <input type="password" id="password" name="password" class="pass-input"
-                                placeholder="Masukkan password" autocomplete="current-password" required>
-                            <button type="button" class="toggle-password" aria-label="Tampilkan password"
-                                aria-pressed="false">
-                                <i class="ti ti-eye-off"></i>
-                            </button>
+                    <div class="mb-3">
+                        <label class="form-label-modern" for="signin-password">Password</label>
+                        <div class="input-wrap">
+                            <i class="ri-lock-password-line input-icon"></i>
+                            <input id="signin-password" type="password" class="form-control-modern"
+                                placeholder="Masukkan password" name="password" autocomplete="current-password"
+                                required>
+                            <button type="button" class="password-toggle" aria-label="Tampilkan password"
+                                aria-pressed="false"><i class="ri-eye-off-line align-middle"></i></button>
                         </div>
                     </div>
-
-                    <button type="submit" class="login-submit">
-                        <span>Masuk Dashboard</span>
-                        <i class="ti ti-arrow-right"></i>
-                    </button>
+                    <button type="submit" class="login-btn mt-2">Masuk Dashboard</button>
                 </form>
-
-                <div class="login-support">
-                    <i class="ti ti-shield-check"></i>
-                    <span>Akses dibatasi untuk user terdaftar.</span>
-                </div>
-
-                <p class="login-footer">
-                    Copyright &copy; <span id="login-year"></span> Cakra Corp. Developed by IT Team
-                </p>
+                <div class="login-card-note"><i class="ri-shield-check-line"></i> Akses aman untuk tim internal
+                    perusahaan.</div>
+                <p class="login-footer">&copy; <?= date('Y') ?> Cakra Corp. Developed by IT Team</p>
             </div>
         </section>
     </main>
-
-    <script src="<?= base_url() ?>assets/template/crms/assets/js/jquery-3.7.1.min.js"></script>
-    <script src="<?= base_url() ?>assets/template/crms/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= base_url() ?>assets/template/crms/assets/js/script.js"></script>
-    <script src="<?= base_url() ?>assets/libs/sweetalert2/sweetalert2.min.js"></script>
-    <script src="<?= base_url() ?>assets/js/login.js"></script>
-    <script src="<?= base_url() ?>assets/js/proses.js"></script>
+    <script src="<?= base_url('assets/template/crms/assets/js/jquery-3.7.1.min.js'); ?>"></script>
+    <script src="<?= base_url('assets/template/crms/assets/js/bootstrap.bundle.min.js'); ?>"></script>
+    <script src="<?= base_url('assets/libs/sweetalert2/sweetalert2.min.js'); ?>"></script>
+    <script src="<?= base_url('assets/js/proses.js'); ?>"></script>
+    <script>
+    document.querySelector('.password-toggle').addEventListener('click', function() {
+        const passwordInput = document.getElementById('signin-password');
+        const passwordIcon = this.querySelector('i');
+        const showPassword = passwordInput.type === 'password';
+        passwordInput.type = showPassword ? 'text' : 'password';
+        passwordIcon.classList.toggle('ri-eye-off-line', !showPassword);
+        passwordIcon.classList.toggle('ri-eye-line', showPassword);
+        this.setAttribute('aria-label', showPassword ? 'Sembunyikan password' : 'Tampilkan password');
+        this.setAttribute('aria-pressed', showPassword ? 'true' : 'false');
+    });
+    </script>
 </body>
 
 </html>

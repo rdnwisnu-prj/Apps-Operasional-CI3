@@ -12,7 +12,7 @@ class Auth extends CI_Controller
 
     public function index()
     {
-        $data['judul'] = 'Operasional Web App | Login';
+        $data['title'] = 'Operasional Web App | Login';
         $this->form_validation->set_rules('username', 'Username / NIK', 'required|trim');
         $this->form_validation->set_rules('password', 'Password', 'required|trim');
 
