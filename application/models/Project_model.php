@@ -854,6 +854,9 @@ class Project_model extends CI_Model
             ? "CASE WHEN tab_transport.jenis_pengeluaran IN ('Mobil', 'Sewa Operasional') THEN CONCAT(tab_transport.jenis, ' - ', tab_transport.tipe) ELSE '' END"
             : "CONCAT(tab_transport.jenis, ' - ', tab_transport.tipe)";
         $transportAmountSelect = $this->db->field_exists('nominal', 'tab_transport') ? 'tab_transport.nominal' : '0';
+        $transportStnkSelect = $this->db->field_exists('stnk', 'tab_transport')
+            ? 'tab_transport.stnk AS lampiran_secondary'
+            : 'NULL AS lampiran_secondary';
         $feeDokterProcessSelect = $this->db->table_exists('tab_fee_dokter') && $this->db->field_exists('proses', 'tab_fee_dokter')
             ? 'tab_fee_dokter.proses'
             : "'2'";
@@ -894,7 +897,7 @@ class Project_model extends CI_Model
                 'table' => 'tab_transport',
                 'primary_key' => 'id_transport',
                 'order' => 'tab_transport.tgl_transport',
-                'select' => "tab_transport.id_transport AS id, tab_transport.proses, tab_transport.tgl_transport AS date_start, NULL AS date_end, {$transportNameSelect} AS item_name, {$transportMetaSelect} AS item_meta, NULL AS quantity, {$transportAmountSelect} AS unit_price, NULL AS extra_amount, {$transportAmountSelect} AS amount, tab_transport.keterangan, tab_transport.lampiran, u.nama AS created_by",
+                'select' => "tab_transport.id_transport AS id, tab_transport.proses, tab_transport.tgl_transport AS date_start, NULL AS date_end, {$transportNameSelect} AS item_name, {$transportMetaSelect} AS item_meta, NULL AS quantity, {$transportAmountSelect} AS unit_price, NULL AS extra_amount, {$transportAmountSelect} AS amount, tab_transport.keterangan, tab_transport.lampiran, {$transportStnkSelect}, u.nama AS created_by",
             ],
             'penginapan' => [
                 'label' => 'Penginapan',

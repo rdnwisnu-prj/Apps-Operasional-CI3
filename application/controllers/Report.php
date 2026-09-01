@@ -5,9 +5,9 @@ class Report extends CI_Controller
 {
     public function __construct()
 	{
-	    parent::__construct();
+        parent::__construct();
         $this->load->model('Project_model', 'project');
-        $this->load->library(['form_validation', 'dompdf_lib']);
+        $this->load->library(['form_validation', 'mpdf_lib']);
 	    is_logged_in();
 	}
 	
@@ -55,74 +55,38 @@ class Report extends CI_Controller
             return;
         }
 
-        $this->form_validation->set_rules('kode_project', 'Project/Site', 'required|trim');
-        $this->form_validation->set_rules('proses', 'Proses', 'required|trim|in_list[1,2,3,4]');
-        $this->form_validation->set_rules('tgl_awal', 'Tanggal Awal', 'required|trim|callback_validDate');
-        $this->form_validation->set_rules('tgl_akhir', 'Tanggal Akhir', 'required|trim|callback_validDate');
-
-        if ($this->form_validation->run() === FALSE) {
-            $this->session->set_flashdata('error', validation_errors('', ''));
+        $payload = $this->buildActivityReportPayload();
+        if (!$payload) {
             redirect('Report');
             return;
         }
 
-        $kodeProject = $this->input->post('kode_project', true);
-        $project = $this->project->getProjectDetail($kodeProject);
+        $filename = 'laporan-operasional-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $payload['project']['kode_project'] . '-' . implode('-', $payload['proses_list'])) . '.pdf';
+        $html = $this->load->view('report/activity_pdf', $payload, true);
+        $this->mpdf_lib->loadHtml($html);
+        $this->mpdf_lib->setPaper('A4', 'portrait');
+        $this->mpdf_lib->render();
+        $this->mpdf_lib->stream($filename, ['Attachment' => true]);
+    }
 
-        if (!$project) {
-            $this->session->set_flashdata('error', 'Data project tidak ditemukan.');
+    public function previewActivity()
+    {
+        if ($this->input->method(TRUE) !== 'POST') {
             redirect('Report');
             return;
         }
 
-        if ((int) $this->session->userdata('role_id') === 8
-            && !$this->project->canKorlapAccessProject($kodeProject, (int) $this->session->userdata('id_user'))) {
-            $this->session->set_flashdata('error', 'Akses ditolak. Project tidak sesuai korlap login.');
+        $payload = $this->buildActivityReportPayload();
+        if (!$payload) {
             redirect('Report');
             return;
         }
 
-        $dateRange = $this->normalizeDateRange(
-            $this->input->post('tgl_awal', true),
-            $this->input->post('tgl_akhir', true),
-            $project['tgl_mulai'] ?? null,
-            $project['tgl_selesai'] ?? null
-        );
+        $payload['preview_mode'] = true;
 
-        if (!$dateRange) {
-            $this->session->set_flashdata('error', 'Range tanggal tidak valid.');
-            redirect('Report');
-            return;
-        }
-
-        $proses = (string) $this->input->post('proses', true);
-        $processOptions = $this->getProcessOptions();
-        $summary = $this->project->getProjectFinancialSummary($kodeProject);
-        $report = $this->buildActivityReportRows($summary, $dateRange['start'], $dateRange['end'], $proses);
-        $signatureNames = $this->getActivitySignatureNames($kodeProject, $report);
-
-        $html = $this->load->view('report/activity_pdf', [
-            'project' => $project,
-            'process_label' => $processOptions[$proses] ?? '-',
-            'date_start' => $dateRange['start'],
-            'date_end' => $dateRange['end'],
-            'rows' => $report['rows'],
-            'income_total' => $report['income_total'],
-            'topup_total' => $report['topup_total'],
-            'expense_total' => $report['expense_total'],
-            'saldo_total' => $report['income_total'] - $report['expense_total'],
-            'korlap_name' => $signatureNames['korlap_name'],
-            'verified_by_name' => $signatureNames['verified_by_name'],
-            'validated_by_name' => $signatureNames['validated_by_name'],
-            'approved_by_name' => $signatureNames['approved_by_name'],
-            'logo_base64' => $this->imageToBase64(FCPATH . 'assets/img/logo-cakra.png'),
-        ], true);
-
-        $filename = 'laporan-operasional-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $kodeProject . '-' . $proses) . '.pdf';
-        $this->dompdf_lib->loadHtml($html);
-        $this->dompdf_lib->setPaper('A4', 'portrait');
-        $this->dompdf_lib->render();
-        $this->dompdf_lib->stream($filename, ['Attachment' => true]);
+        $this->output
+            ->set_content_type('text/html', 'utf-8')
+            ->set_output($this->load->view('report/activity_pdf', $payload, true));
     }
 
     public function validDate($value)
@@ -136,6 +100,186 @@ class Report extends CI_Controller
         }
 
         return true;
+    }
+
+    private function buildActivityReportPayload()
+    {
+        $this->form_validation->set_rules('kode_project', 'Project/Site', 'required|trim');
+        $this->form_validation->set_rules('tgl_awal', 'Tanggal Awal', 'required|trim|callback_validDate');
+        $this->form_validation->set_rules('tgl_akhir', 'Tanggal Akhir', 'required|trim|callback_validDate');
+
+        if ($this->form_validation->run() === FALSE) {
+            $this->session->set_flashdata('error', validation_errors('', ''));
+            return null;
+        }
+
+        $processOptions = $this->getProcessOptions();
+        $prosesList = $this->normalizeSelectedProcesses($this->getSelectedProcessInput(), $processOptions);
+        if (empty($prosesList)) {
+            $this->session->set_flashdata('error', 'Pilih minimal satu proses.');
+            return null;
+        }
+
+        $kodeProject = $this->input->post('kode_project', true);
+        $project = $this->project->getProjectDetail($kodeProject);
+
+        if (!$project) {
+            $this->session->set_flashdata('error', 'Data project tidak ditemukan.');
+            return null;
+        }
+
+        if ((int) $this->session->userdata('role_id') === 8
+            && !$this->project->canKorlapAccessProject($kodeProject, (int) $this->session->userdata('id_user'))) {
+            $this->session->set_flashdata('error', 'Akses ditolak. Project tidak sesuai korlap login.');
+            return null;
+        }
+
+        $dateRange = $this->normalizeDateRange(
+            $this->input->post('tgl_awal', true),
+            $this->input->post('tgl_akhir', true),
+            $project['tgl_mulai'] ?? null,
+            $project['tgl_selesai'] ?? null
+        );
+
+        if (!$dateRange) {
+            $this->session->set_flashdata('error', 'Range tanggal tidak valid.');
+            return null;
+        }
+
+        $summary = $this->project->getProjectFinancialSummary($kodeProject);
+        $report = $this->buildActivityReportRows($summary, $dateRange['start'], $dateRange['end'], $prosesList);
+        $attachments = $this->buildActivityAttachmentSections($summary, $dateRange['start'], $dateRange['end'], $prosesList);
+        $signatureNames = $this->getActivitySignatureNames($kodeProject, $report);
+
+        return [
+            'project' => $project,
+            'proses_list' => $prosesList,
+            'process_label' => $this->buildProcessLabel($prosesList, $processOptions),
+            'date_start' => $dateRange['start'],
+            'date_end' => $dateRange['end'],
+            'rows' => $report['rows'],
+            'income_total' => $report['income_total'],
+            'topup_total' => $report['topup_total'],
+            'expense_total' => $report['expense_total'],
+            'saldo_total' => $report['income_total'] - $report['expense_total'],
+            'attachment_sections' => $attachments,
+            'korlap_name' => $signatureNames['korlap_name'],
+            'verified_by_name' => $signatureNames['verified_by_name'],
+            'validated_by_name' => $signatureNames['validated_by_name'],
+            'approved_by_name' => $signatureNames['approved_by_name'],
+            'logo_base64' => $this->imageToBase64(FCPATH . 'assets/img/logo-cakra.png'),
+        ];
+    }
+
+    private function buildActivityAttachmentSections($summary, $start, $end, $prosesList)
+    {
+        $sections = [];
+
+        foreach ($prosesList as $proses) {
+            $processData = $summary['expense_by_process'][$proses] ?? null;
+            if (!$processData) {
+                continue;
+            }
+
+            $processSection = [
+                'label' => $processData['label'] ?? '-',
+                'categories' => [],
+            ];
+
+            foreach (($processData['categories'] ?? []) as $categoryKey => $category) {
+                $items = [];
+
+                foreach (($category['rows'] ?? []) as $expense) {
+                    if (!$this->isActivityExpenseInRange($expense, $start, $end)) {
+                        continue;
+                    }
+
+                    foreach ($this->getActivityAttachmentItems($categoryKey, $category, $expense) as $attachment) {
+                        $items[] = $attachment;
+                    }
+                }
+
+                if (!empty($items)) {
+                    $processSection['categories'][] = [
+                        'label' => $category['label'] ?? ucfirst($categoryKey),
+                        'items' => $items,
+                    ];
+                }
+            }
+
+            if (!empty($processSection['categories'])) {
+                $sections[] = $processSection;
+            }
+        }
+
+        return $sections;
+    }
+
+    private function getActivityAttachmentItems($categoryKey, $category, $expense)
+    {
+        $items = [];
+        $files = [
+            [
+                'file' => $expense['lampiran'] ?? '',
+                'label' => $categoryKey === 'penginapan' ? 'Invoice/Bukti' : 'Lampiran',
+            ],
+            [
+                'file' => $expense['lampiran_secondary'] ?? ($expense['stnk'] ?? ''),
+                'label' => 'STNK',
+            ],
+        ];
+
+        foreach ($files as $file) {
+            $filename = trim((string) ($file['file'] ?? ''));
+            if ($filename === '') {
+                continue;
+            }
+
+            $path = $this->getActivityAttachmentPath($categoryKey, $filename);
+            $items[] = [
+                'label' => $file['label'],
+                'title' => trim((string) ($expense['item_name'] ?? '-')),
+                'meta' => trim((string) ($expense['item_meta'] ?? '')),
+                'date_start' => $expense['date_start'] ?? '',
+                'date_end' => $expense['date_end'] ?? '',
+                'amount' => $expense['amount'] ?? 0,
+                'keterangan' => trim((string) ($expense['keterangan'] ?? '')),
+                'filename' => basename($filename),
+                'url' => $this->getActivityAttachmentUrl($categoryKey, $filename),
+                'image_base64' => $this->imageToBase64($path),
+            ];
+        }
+
+        return $items;
+    }
+
+    private function getActivityAttachmentPath($categoryKey, $filename)
+    {
+        $directory = $this->getActivityAttachmentDirectory($categoryKey);
+
+        return FCPATH . 'uploads' . DIRECTORY_SEPARATOR . $directory . DIRECTORY_SEPARATOR . basename($filename);
+    }
+
+    private function getActivityAttachmentUrl($categoryKey, $filename)
+    {
+        $directory = $this->getActivityAttachmentDirectory($categoryKey);
+
+        return base_url('uploads/' . $directory . '/' . rawurlencode(basename($filename)));
+    }
+
+    private function getActivityAttachmentDirectory($categoryKey)
+    {
+        $directories = [
+            'entertain' => 'entertain',
+            'makan' => 'makan',
+            'fee_dokter' => 'lampiran',
+            'freelance' => 'freelance',
+            'transport' => 'transport',
+            'penginapan' => 'penginapan',
+            'other' => 'other',
+        ];
+
+        return $directories[$categoryKey] ?? $categoryKey;
     }
 
     private function getBulanNames()
@@ -178,6 +322,59 @@ class Report extends CI_Controller
         ];
     }
 
+    private function getSelectedProcessInput()
+    {
+        $processes = [];
+
+        foreach (['proses', 'proses[]', 'proses_mirror'] as $key) {
+            $value = $this->input->post($key, true);
+            if ($value === null && isset($_POST[$key])) {
+                $value = $_POST[$key];
+            }
+
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            foreach ((array) $value as $process) {
+                $processes[] = $process;
+            }
+        }
+
+        return $processes;
+    }
+
+    private function normalizeSelectedProcesses($processes, $processOptions)
+    {
+        if (!is_array($processes)) {
+            $processes = $processes !== null && $processes !== '' ? [$processes] : [];
+        }
+
+        $valid = array_map('strval', array_keys($processOptions));
+        $selected = [];
+
+        foreach ($processes as $process) {
+            $process = trim((string) $process);
+            if ($process !== '' && in_array($process, $valid, true)) {
+                $selected[$process] = true;
+            }
+        }
+
+        return array_keys($selected);
+    }
+
+    private function buildProcessLabel($processes, $processOptions)
+    {
+        $labels = [];
+        foreach ($processes as $process) {
+            if (isset($processOptions[$process])) {
+                $labels[] = $processOptions[$process];
+            }
+        }
+
+        return !empty($labels) ? implode(', ', $labels) : '-';
+    }
+
     private function normalizeDateRange($start, $end, $projectStart, $projectEnd)
     {
         $start = (string) $start;
@@ -203,7 +400,7 @@ class Report extends CI_Controller
         ];
     }
 
-    private function buildActivityReportRows($summary, $start, $end, $proses)
+    private function buildActivityReportRows($summary, $start, $end, $prosesList)
     {
         $rows = [
             'makan_freelance' => ['label' => 'Makan Freelance (Dokter, KSO, Tim Teknis)', 'total' => 0],
@@ -222,8 +419,12 @@ class Report extends CI_Controller
             'approved_by_name' => [],
         ];
 
-        $processData = $summary['expense_by_process'][$proses] ?? null;
-        if ($processData) {
+        foreach ($prosesList as $proses) {
+            $processData = $summary['expense_by_process'][$proses] ?? null;
+            if (!$processData) {
+                continue;
+            }
+
             foreach (($processData['categories'] ?? []) as $categoryKey => $category) {
                 foreach (($category['rows'] ?? []) as $expense) {
                     if ($this->isActivityExpenseInRange($expense, $start, $end)) {
@@ -237,12 +438,16 @@ class Report extends CI_Controller
             }
         }
 
-        $incomeTotal = (float) ($summary['budget_by_process'][$proses]['total'] ?? 0);
+        $incomeTotal = 0;
         $topupTotal = 0;
-        foreach (($summary['topup_by_process'][$proses]['rows'] ?? []) as $topup) {
-            $topupDate = substr((string) ($topup['tgl_topup'] ?? $topup['created_at'] ?? ''), 0, 10);
-            if ($topupDate !== '' && $topupDate >= $start && $topupDate <= $end) {
-                $topupTotal += (float) ($topup['amount'] ?? 0);
+        foreach ($prosesList as $proses) {
+            $incomeTotal += (float) ($summary['budget_by_process'][$proses]['total'] ?? 0);
+
+            foreach (($summary['topup_by_process'][$proses]['rows'] ?? []) as $topup) {
+                $topupDate = substr((string) ($topup['tgl_topup'] ?? $topup['created_at'] ?? ''), 0, 10);
+                if ($topupDate !== '' && $topupDate >= $start && $topupDate <= $end) {
+                    $topupTotal += (float) ($topup['amount'] ?? 0);
+                }
             }
         }
 
@@ -362,7 +567,19 @@ class Report extends CI_Controller
             return '';
         }
 
-        $type = pathinfo($path, PATHINFO_EXTENSION);
-        return 'data:image/' . $type . ';base64,' . base64_encode(file_get_contents($path));
+        $type = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+        ];
+
+        if (!isset($mimeTypes[$type])) {
+            return '';
+        }
+
+        return 'data:' . $mimeTypes[$type] . ';base64,' . base64_encode(file_get_contents($path));
     }
 }

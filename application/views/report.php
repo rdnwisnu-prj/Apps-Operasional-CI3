@@ -1,4 +1,76 @@
 <div class="page-wrapper">
+    <style>
+    #form-export-activity .report-process-select+.select2-container {
+        width: 100% !important;
+    }
+
+    #form-export-activity .report-process-selection,
+    #form-export-activity .report-process-select+.select2-container .select2-selection--multiple {
+        min-height: 40px;
+        max-height: 76px;
+        overflow-y: auto;
+        border-color: #dbe1e7;
+        border-radius: 4px;
+        padding: 4px 34px 4px 8px;
+    }
+
+    #form-export-activity .report-process-selection .select2-selection__rendered,
+    #form-export-activity .report-process-select+.select2-container .select2-selection--multiple .select2-selection__rendered {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        line-height: 1.35;
+        white-space: normal;
+        overflow: visible;
+    }
+
+    #form-export-activity .report-process-selection .select2-selection__choice,
+    #form-export-activity .report-process-select+.select2-container .select2-selection--multiple .select2-selection__choice {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+        padding: 4px 9px;
+        border: 1px solid #cfd6df;
+        border-radius: 4px;
+        background: #f8fafc;
+        color: #202b37;
+        font-size: 13px;
+        line-height: 1.2;
+    }
+
+    #form-export-activity .report-process-selection .select2-selection__choice__remove,
+    #form-export-activity .report-process-select+.select2-container .select2-selection--multiple .select2-selection__choice__remove {
+        margin-right: 2px;
+        color: #5f6b7a;
+        font-weight: 700;
+    }
+
+    #form-export-activity .report-process-selection .select2-search--inline,
+    #form-export-activity .report-process-select+.select2-container .select2-selection--multiple .select2-search--inline {
+        margin: 0;
+    }
+
+    #form-export-activity .report-process-selection .select2-search__field,
+    #form-export-activity .report-process-select+.select2-container .select2-selection--multiple .select2-search__field {
+        margin: 3px 0 0;
+        min-width: 150px;
+        height: 24px;
+    }
+
+    .report-process-dropdown .select2-results__option {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .report-process-dropdown .select2-results__option[aria-selected=true] {
+        background: #eef2f7;
+        color: #202b37;
+    }
+    </style>
 
     <?php if ($this->session->flashdata('flash')): ?>
     <div class="flash-data" data-flashdata="<?= $this->session->flashdata('flash'); ?>"></div>
@@ -26,13 +98,11 @@
             <div class="card-header">
                 <div class="row align-items-center gy-3">
                     <div class="col-sm">
-                        <form action="<?= base_url('Report/exportActivity') ?>" method="post"
-                            id="form-export-activity">
+                        <form action="<?= base_url('Report/exportActivity') ?>" method="post" id="form-export-activity">
                             <div class="row g-3">
                                 <div class="col-xl-12">
-                                    <div class="row g-3 align-items-end">
-                                        <div class="col-xl-3 col-lg-6">
-                                            <label class="form-label" for="kode_project">Project/Site</label>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
                                             <select class="form-select" name="kode_project" id="kode_project" required>
                                                 <option value="">Pilih Project/Site</option>
                                                 <?php foreach (($projects ?? []) as $project): ?>
@@ -53,10 +123,10 @@
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
-                                        <div class="col-xl-3 col-lg-6">
-                                            <label class="form-label" for="proses">Proses</label>
-                                            <select class="form-select" name="proses" id="proses" required>
-                                                <option value="">Pilih Proses</option>
+                                        <div class="col-md-3">
+                                            <select class="form-control select2-multiple report-process-select"
+                                                name="proses[]" id="proses" data-placeholder="Pilih Proses" multiple
+                                                required>
                                                 <?php foreach (($process_options ?? []) as $value => $label): ?>
                                                 <option value="<?= html_escape($value); ?>">
                                                     <?= html_escape($label); ?>
@@ -64,24 +134,28 @@
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
-                                        <div class="col-xl-2 col-lg-6">
-                                            <label class="form-label">Tanggal Awal</label>
+                                        <div class="col-md-2">
                                             <input type="text" class="form-control" name="tgl_awal" id="report_tgl_awal"
                                                 data-provider="flatpickr" data-date-format="Y-m-d"
                                                 placeholder="Pilih Tanggal Awal" required />
                                         </div>
-                                        <div class="col-xl-2 col-lg-6">
-                                            <label class="form-label">Tanggal Akhir</label>
-                                            <input type="text" class="form-control" name="tgl_akhir" id="report_tgl_akhir"
-                                                data-provider="flatpickr" data-date-format="Y-m-d"
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control" name="tgl_akhir"
+                                                id="report_tgl_akhir" data-provider="flatpickr" data-date-format="Y-m-d"
                                                 placeholder="Pilih Tanggal Akhir" required />
                                         </div>
-                                        <div class="col-xl-2 col-lg-6">
-                                            <div>
-                                                <button type="submit" class="btn btn-danger" id="btn-export-excel">
-                                                    <i class="ti ti-file-type-pdf me-2 align-bottom"></i> Download PDF
-                                                </button>
-                                            </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-outline-primary"
+                                                id="btn-preview-report"
+                                                data-action="<?= base_url('Report/previewActivity') ?>"
+                                                data-target="_blank">
+                                                <i class="ti ti-eye me-1"></i> View Data
+                                            </button>
+                                            <button type="submit" class="btn btn-danger" id="btn-export-pdf"
+                                                data-action="<?= base_url('Report/exportActivity') ?>"
+                                                data-target="_self">
+                                                <i class="ti ti-file-type-pdf me-1"></i> Download PDF
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -118,6 +192,8 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         var projectSelect = document.getElementById('kode_project');
+        var exportForm = document.getElementById('form-export-activity');
+        var processSelect = document.getElementById('proses');
         var startInput = document.getElementById('report_tgl_awal');
         var endInput = document.getElementById('report_tgl_akhir');
         var startPicker = null;
@@ -147,7 +223,10 @@
                 placeholder: 'Pilih Proses',
                 allowClear: true,
                 width: '100%',
-                theme: 'bootstrap-5'
+                theme: 'bootstrap-5',
+                closeOnSelect: false,
+                selectionCssClass: 'report-process-selection',
+                dropdownCssClass: 'report-process-dropdown'
             });
         }
 
@@ -183,6 +262,42 @@
         projectSelect.addEventListener('change', setPickerRange);
         if (typeof $ !== 'undefined') {
             $('#kode_project').on('select2:select select2:clear', setPickerRange);
+        }
+
+        if (exportForm && processSelect) {
+            exportForm.querySelectorAll('button[type="submit"][data-action]').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    exportForm.action = button.getAttribute('data-action') || exportForm.action;
+                    exportForm.target = button.getAttribute('data-target') || '_self';
+                });
+            });
+
+            exportForm.addEventListener('submit', function(event) {
+                var selectedProcesses = typeof $ !== 'undefined' ?
+                    ($('#proses').val() || []) :
+                    Array.prototype.slice.call(processSelect.selectedOptions).map(function(option) {
+                        return option.value;
+                    });
+
+                exportForm.querySelectorAll('.js-proses-mirror').forEach(function(input) {
+                    input.remove();
+                });
+
+                if (!selectedProcesses.length) {
+                    event.preventDefault();
+                    alert('Pilih minimal satu proses.');
+                    return;
+                }
+
+                selectedProcesses.forEach(function(value) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'proses_mirror[]';
+                    input.value = value;
+                    input.className = 'js-proses-mirror';
+                    exportForm.appendChild(input);
+                });
+            });
         }
     });
     </script>
