@@ -49,7 +49,7 @@ $proses_options = $proses_options ?? [
                                     <?php foreach ($project as $p): ?>
                                     <option value="<?= $p['kode_project'] ?>"
                                         <?= (isset($edit_data) && $edit_data['project'] == $p['kode_project']) ? 'selected' : set_select('project', $p['kode_project']) ?>>
-                                        <?= $p['nama_project'] ?>
+                                        <?= html_escape($p['nama_perusahaan'] . ' - ' . $p['nama_site']); ?>
                                     </option>
                                     <?php endforeach; ?>
                                 </select>
