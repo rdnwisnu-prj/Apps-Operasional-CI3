@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Favicon -->
-    <link rel="shortcut icon" href="<?= base_url() ?>assets/img/logo/favicon.png">
+    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon-cakra.png'); ?>">
 
     <!-- Theme Config Js -->
     <script src="<?= base_url()?>assets/js/fixed-theme.js"></script>
