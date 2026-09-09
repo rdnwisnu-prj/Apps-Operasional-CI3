@@ -31,7 +31,7 @@ class KeluhanAps extends CI_Controller
         }
 
         $data = [
-            'title'             => 'Operasional Web App | Report Keluhan APS',
+            'title'             => 'Operational Cakra Application | Report Keluhan APS',
             'header'            => 'Reports',
             'subheader'         => 'Report Keluhan APS',
             'current_year'      => $current_year,

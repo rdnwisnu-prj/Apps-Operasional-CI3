@@ -30,7 +30,7 @@ class Project extends CI_Controller
         $marketingProjectSites = $this->getMarketingProjectSiteOptions($projects);
 
         $data = [
-            'title'      => 'Operasional Web App | Project',
+            'title'      => 'Operational Cakra Application | Project',
             'header'     => 'Master Data',
             'subheader'  => 'Data Project',
             'project'    => $projects,
@@ -119,6 +119,7 @@ class Project extends CI_Controller
     private function setRules()
     {
         $this->form_validation->set_rules('marketing_project_site_key', 'Project/Site Marketing', 'required|trim');
+        $this->form_validation->set_rules('nama_project', 'Nama Project', 'required|trim');
     }
 
     private function splitMarketingProjectSiteKey($key)
@@ -145,7 +146,7 @@ class Project extends CI_Controller
             'nama_project'  => $this->input->post('nama_project', true),
             'tgl_mulai'     => $this->input->post('tgl_mulai', true),
             'tgl_selesai'   => $this->input->post('tgl_selesai', true),
-            'deskripsi'     => $this->input->post('deskripsi', true) ?: '',
+            'deskripsi'     => $this->input->post('deskripsi', true) ?: '-',
             'updated_at'    => date('Y-m-d H:i:s'),
         ];
 
@@ -186,7 +187,7 @@ class Project extends CI_Controller
         $filteredFinancial = $this->filterFinancialSummaryByRole($financialSummary);
 
         $data = [
-            'title'             => 'Operasional Web App | Detail Project',
+            'title'             => 'Operational Cakra Application | Detail Project',
             'header'            => 'Master Data',
             'subheader'         => 'Detail Project',
             'project_detail'    => $project,
@@ -298,7 +299,10 @@ class Project extends CI_Controller
         $result = $this->marketing_api->syncProjectSiteByKey(
             $key['marketing_project_id'],
             $key['marketing_site_id'],
-            ['deskripsi' => $this->input->post('deskripsi', true) ?: '']
+            [
+                'nama_project' => $this->input->post('nama_project', true),
+                'deskripsi' => $this->input->post('deskripsi', true) ?: '-',
+            ]
         );
 
         if ($result['success']) {
@@ -369,7 +373,8 @@ class Project extends CI_Controller
             $key['marketing_site_id'],
             [
                 'kode_project' => $kode_project,
-                'deskripsi' => $this->input->post('deskripsi', true) ?: '',
+                'nama_project' => $this->input->post('nama_project', true),
+                'deskripsi' => $this->input->post('deskripsi', true) ?: '-',
             ]
         );
         if ($result['success']) {

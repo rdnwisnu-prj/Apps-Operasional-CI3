@@ -19,7 +19,7 @@ class Freelance extends CI_Controller
     public function index()
     {
         $data = [
-            'title'     => 'Operasional Web App | Fee Freelance',
+            'title'     => 'Operational Cakra Application | Fee Freelance',
             'header'    => 'Keuangan',
             'subheader' => 'Fee Freelance',
             'freelance' => $this->freelance->getData(),
@@ -35,7 +35,7 @@ class Freelance extends CI_Controller
     public function Store()
     {
         $data = [
-            'title'     => 'Operasional Web App | Tambah Fee Freelance',
+            'title'     => 'Operational Cakra Application | Tambah Fee Freelance',
             'header'    => 'Keuangan',
             'subheader' => 'Fee Freelance',
             'projects'  => $this->freelance->getProjects()
@@ -114,7 +114,7 @@ class Freelance extends CI_Controller
         }
 
         $data = [
-            'title'     => 'Operasional Web App | Edit Fee Freelance',
+            'title'     => 'Operational Cakra Application | Edit Fee Freelance',
             'header'    => 'Keuangan',
             'subheader' => 'Fee Freelance',
             'edit_data' => $edit_data,

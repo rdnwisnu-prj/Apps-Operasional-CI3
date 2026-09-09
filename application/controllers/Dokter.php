@@ -15,7 +15,7 @@ class Dokter extends CI_Controller
     public function index()
     {
         $data = [
-            'title'      => 'Operasional Web App | Data Dokter',
+            'title'      => 'Operational Cakra Application | Data Dokter',
             'header'     => 'Master Data',
             'subheader'  => 'Dokter',
             'dokter'     => $this->dokter->getData()

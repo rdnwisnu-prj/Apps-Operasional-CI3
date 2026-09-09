@@ -315,7 +315,8 @@ foreach ($process_finance as $processKey => $processRow) {
         <div class="d-flex align-items-center justify-content-between gap-2 mb-4 flex-wrap">
             <div>
                 <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                    <h4 class="mb-0"><?= html_escape($project_detail['nama_project']); ?></h4>
+                    <h4 class="mb-0"><?= html_escape($project_detail['nama_perusahaan']); ?> -
+                        <?= html_escape($project_detail['nama_site']); ?></h4>
                     <span class="badge bg-primary-subtle text-primary">Tampilan:
                         <?= html_escape($financial_scope); ?></span>
                 </div>
@@ -484,10 +485,6 @@ foreach ($process_finance as $processKey => $processRow) {
                                     <?= html_escape(trim(($project_detail['nama_kota'] ?? '') . ' ' . ($project_detail['nama_provinsi'] ?? '')) ?: '-'); ?>
                                 </p>
                             </div>
-                            <div class="info-row">
-                                <p class="info-label">Dibuat Oleh</p>
-                                <p class="info-value"><?= html_escape($project_detail['created_by'] ?? '-'); ?></p>
-                            </div>
                         </div>
 
                         <h6 class="mb-3 fw-semibold">Deskripsi</h6>
@@ -599,7 +596,9 @@ foreach ($process_finance as $processKey => $processRow) {
                                                     class="btn btn-sm btn-primary project-approve-bulk"
                                                     data-action-label="<?= html_escape($currentApprovalConfig['label']); ?>"
                                                     data-target-label="<?= html_escape($currentApprovalConfig['target_label']); ?>">
-                                                    <i class="ti ti-checks me-1"></i><?= html_escape($currentApprovalConfig['label']); ?> Terpilih
+                                                    <i
+                                                        class="ti ti-checks me-1"></i><?= html_escape($currentApprovalConfig['label']); ?>
+                                                    Terpilih
                                                 </button>
                                                 <?php endif; ?>
                                                 <span class="badge bg-success-subtle text-success">Total
@@ -681,16 +680,16 @@ foreach ($process_finance as $processKey => $processRow) {
                                                             <?php if (!empty($expense['verified_by_name']) || !empty($expense['validated_by_name']) || !empty($expense['approved_by_name'])): ?>
                                                             <small class="text-muted approval-meta d-block mt-1">
                                                                 <?php if (!empty($expense['verified_by_name'])): ?>
-                                                                <span
-                                                                    class="d-block">Verifikasi: <?= html_escape($expense['verified_by_name']); ?><?= !empty($expense['verified_at']) ? ' - ' . project_detail_date($expense['verified_at']) : ''; ?></span>
+                                                                <span class="d-block">Verifikasi:
+                                                                    <?= html_escape($expense['verified_by_name']); ?><?= !empty($expense['verified_at']) ? ' - ' . project_detail_date($expense['verified_at']) : ''; ?></span>
                                                                 <?php endif; ?>
                                                                 <?php if (!empty($expense['validated_by_name'])): ?>
-                                                                <span
-                                                                    class="d-block">Validasi: <?= html_escape($expense['validated_by_name']); ?><?= !empty($expense['validated_at']) ? ' - ' . project_detail_date($expense['validated_at']) : ''; ?></span>
+                                                                <span class="d-block">Validasi:
+                                                                    <?= html_escape($expense['validated_by_name']); ?><?= !empty($expense['validated_at']) ? ' - ' . project_detail_date($expense['validated_at']) : ''; ?></span>
                                                                 <?php endif; ?>
                                                                 <?php if (!empty($expense['approved_by_name'])): ?>
-                                                                <span
-                                                                    class="d-block">Approve: <?= html_escape($expense['approved_by_name']); ?><?= !empty($expense['approved_at']) ? ' - ' . project_detail_date($expense['approved_at']) : ''; ?></span>
+                                                                <span class="d-block">Approve:
+                                                                    <?= html_escape($expense['approved_by_name']); ?><?= !empty($expense['approved_at']) ? ' - ' . project_detail_date($expense['approved_at']) : ''; ?></span>
                                                                 <?php endif; ?>
                                                             </small>
                                                             <?php endif; ?>
@@ -712,7 +711,8 @@ foreach ($process_finance as $processKey => $processRow) {
                                                                     value="<?= (int) ($expense['id'] ?? 0); ?>">
                                                                 <button type="submit"
                                                                     class="btn btn-sm <?= html_escape($currentApprovalConfig['button_class']); ?>">
-                                                                    <i class="<?= html_escape($currentApprovalConfig['icon']); ?> me-1"></i><?= html_escape($currentApprovalConfig['label']); ?>
+                                                                    <i
+                                                                        class="<?= html_escape($currentApprovalConfig['icon']); ?> me-1"></i><?= html_escape($currentApprovalConfig['label']); ?>
                                                                 </button>
                                                             </form>
                                                             <?php else: ?>
@@ -752,97 +752,101 @@ foreach ($process_finance as $processKey => $processRow) {
 
     </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.project-approve-check-all').forEach(function(checkAll) {
-        checkAll.addEventListener('change', function() {
-            var group = checkAll.getAttribute('data-check-group');
-            document.querySelectorAll('.project-approve-check[data-check-group="' + group + '"]').forEach(function(item) {
-                item.checked = checkAll.checked;
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.project-approve-check-all').forEach(function(checkAll) {
+            checkAll.addEventListener('change', function() {
+                var group = checkAll.getAttribute('data-check-group');
+                document.querySelectorAll('.project-approve-check[data-check-group="' + group +
+                    '"]').forEach(function(item) {
+                    item.checked = checkAll.checked;
+                });
+            });
+        });
+
+        document.querySelectorAll('.project-approve-bulk').forEach(function(button) {
+            button.addEventListener('click', function(event) {
+                var form = document.getElementById(button.getAttribute('form'));
+                if (!form) {
+                    return;
+                }
+
+                var checked = document.querySelectorAll('.project-approve-check[form="' + form
+                    .id + '"]:checked');
+                var actionLabel = button.getAttribute('data-action-label') || 'Approval';
+                var targetLabel = button.getAttribute('data-target-label') || 'diproses';
+                if (!checked.length) {
+                    event.preventDefault();
+                    if (window.Swal) {
+                        Swal.fire('Data belum dipilih', 'Pilih minimal satu data untuk ' +
+                            actionLabel + '.', 'warning');
+                    } else {
+                        alert('Pilih minimal satu data untuk ' + actionLabel + '.');
+                    }
+                    return;
+                }
+
+                if (form.dataset.confirmed === '1') {
+                    return;
+                }
+
+                event.preventDefault();
+                var submitForm = function() {
+                    form.dataset.confirmed = '1';
+                    form.submit();
+                };
+
+                if (window.Swal) {
+                    Swal.fire({
+                        title: actionLabel + ' data terpilih?',
+                        text: checked.length + ' data akan diubah menjadi ' +
+                            targetLabel + '.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: actionLabel,
+                        cancelButtonText: 'Batal'
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            submitForm();
+                        }
+                    });
+                } else if (confirm(actionLabel + ' ' + checked.length + ' data terpilih?')) {
+                    submitForm();
+                }
+            });
+        });
+
+        document.querySelectorAll('.project-approve-single').forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.dataset.confirmed === '1') {
+                    return;
+                }
+
+                event.preventDefault();
+                var actionLabel = form.getAttribute('data-action-label') || 'Approval';
+                var targetLabel = form.getAttribute('data-target-label') || 'diproses';
+                var submitForm = function() {
+                    form.dataset.confirmed = '1';
+                    form.submit();
+                };
+
+                if (window.Swal) {
+                    Swal.fire({
+                        title: actionLabel + ' data ini?',
+                        text: 'Status akan berubah menjadi ' + targetLabel + '.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: actionLabel,
+                        cancelButtonText: 'Batal'
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            submitForm();
+                        }
+                    });
+                } else if (confirm(actionLabel + ' data ini?')) {
+                    submitForm();
+                }
             });
         });
     });
-
-    document.querySelectorAll('.project-approve-bulk').forEach(function(button) {
-        button.addEventListener('click', function(event) {
-            var form = document.getElementById(button.getAttribute('form'));
-            if (!form) {
-                return;
-            }
-
-            var checked = document.querySelectorAll('.project-approve-check[form="' + form.id + '"]:checked');
-            var actionLabel = button.getAttribute('data-action-label') || 'Approval';
-            var targetLabel = button.getAttribute('data-target-label') || 'diproses';
-            if (!checked.length) {
-                event.preventDefault();
-                if (window.Swal) {
-                    Swal.fire('Data belum dipilih', 'Pilih minimal satu data untuk ' + actionLabel + '.', 'warning');
-                } else {
-                    alert('Pilih minimal satu data untuk ' + actionLabel + '.');
-                }
-                return;
-            }
-
-            if (form.dataset.confirmed === '1') {
-                return;
-            }
-
-            event.preventDefault();
-            var submitForm = function() {
-                form.dataset.confirmed = '1';
-                form.submit();
-            };
-
-            if (window.Swal) {
-                Swal.fire({
-                    title: actionLabel + ' data terpilih?',
-                    text: checked.length + ' data akan diubah menjadi ' + targetLabel + '.',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: actionLabel,
-                    cancelButtonText: 'Batal'
-                }).then(function(result) {
-                    if (result.isConfirmed) {
-                        submitForm();
-                    }
-                });
-            } else if (confirm(actionLabel + ' ' + checked.length + ' data terpilih?')) {
-                submitForm();
-            }
-        });
-    });
-
-    document.querySelectorAll('.project-approve-single').forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            if (form.dataset.confirmed === '1') {
-                return;
-            }
-
-            event.preventDefault();
-            var actionLabel = form.getAttribute('data-action-label') || 'Approval';
-            var targetLabel = form.getAttribute('data-target-label') || 'diproses';
-            var submitForm = function() {
-                form.dataset.confirmed = '1';
-                form.submit();
-            };
-
-            if (window.Swal) {
-                Swal.fire({
-                    title: actionLabel + ' data ini?',
-                    text: 'Status akan berubah menjadi ' + targetLabel + '.',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: actionLabel,
-                    cancelButtonText: 'Batal'
-                }).then(function(result) {
-                    if (result.isConfirmed) {
-                        submitForm();
-                    }
-                });
-            } else if (confirm(actionLabel + ' data ini?')) {
-                submitForm();
-            }
-        });
-    });
-});
-</script>
+    </script>

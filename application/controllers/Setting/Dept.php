@@ -14,7 +14,7 @@ class Dept extends CI_Controller
 	public function index()
 	{
         $data = [
-            'title'     => 'Operasional Web App | Setting Dept',
+            'title'     => 'Operational Cakra Application | Setting Dept',
             'header'    => 'Pengaturan',
             'subheader' => 'Departement',
             'dept'      => $this->dept->getData(),
@@ -33,7 +33,7 @@ class Dept extends CI_Controller
         if ($this->form_validation->run() == FALSE) {
 
             $data = [
-                'title'     => 'Operasional Web App | Setting Dept',
+                'title'     => 'Operational Cakra Application | Setting Dept',
                 'header'    => 'Pengaturan',
                 'subheader' => 'Departement',
                 'dept'      => $this->dept->getData(),
@@ -63,7 +63,7 @@ class Dept extends CI_Controller
         $edit_data = $this->dept->getDeptById($id_dept);
         
         $data = [
-            'title'     => 'Operasional Web App | Setting Dept',
+            'title'     => 'Operational Cakra Application | Setting Dept',
             'header'    => 'Pengaturan',
             'subheader' => 'Departement',
             'dept'      => $this->dept->getData(),
@@ -87,7 +87,7 @@ class Dept extends CI_Controller
             $edit_data = $this->dept->getDeptById($id_dept);
     
             $data = [
-                'title'     => 'Operasional Web App | Setting Dept',
+                'title'     => 'Operational Cakra Application | Setting Dept',
                 'header'    => 'Pengaturan',
                 'subheader' => 'Departement',  
                 'dept'      => $this->dept->getData(),

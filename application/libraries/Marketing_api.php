@@ -156,7 +156,8 @@ class Marketing_api
             $perusahaan['id_perusahaan'],
             $site['id_site'],
             $options['kode_project'] ?? null,
-            $options['deskripsi'] ?? null
+            $options['deskripsi'] ?? null,
+            $options['nama_project'] ?? null
         );
 
         if (!$project) {
@@ -339,7 +340,7 @@ class Marketing_api
         return ['id_site' => (int) $this->CI->db->insert_id(), 'action' => 'inserted'];
     }
 
-    private function upsertProjectFromProjectSite($row, $id_perusahaan, $id_site, $kode_project = null, $deskripsi_override = null)
+    private function upsertProjectFromProjectSite($row, $id_perusahaan, $id_site, $kode_project = null, $deskripsi_override = null, $nama_project_override = null)
     {
         $marketingProjectId = (int) $row['marketing_project_id'];
         $marketingSiteId = (int) $row['marketing_site_id'];
@@ -354,6 +355,11 @@ class Marketing_api
         $tglMulai = $row['tgl_pelaksanaan'] ?: null;
         $tglSelesai = $row['tgl_selesai'] ?: $tglMulai;
 
+        $namaProject = trim((string) $nama_project_override);
+        if ($namaProject === '') {
+            $namaProject = $row['nama_project'] ?: 'Project #' . $marketingProjectId;
+        }
+
         if (!$tglMulai || !$tglSelesai) {
             return false;
         }
@@ -361,10 +367,10 @@ class Marketing_api
         $data = [
             'perusahaan_id' => (int) $id_perusahaan,
             'site_id' => (int) $id_site,
-            'nama_project' => $row['nama_project'] ?: 'Project #' . $marketingProjectId,
+            'nama_project' => $namaProject,
             'tgl_mulai' => $tglMulai,
             'tgl_selesai' => $tglSelesai,
-            'deskripsi' => $deskripsi_override !== null ? $deskripsi_override : ($row['deskripsi'] ?: ($row['keterangan'] ?: '')),
+            'deskripsi' => $deskripsi_override !== null ? $deskripsi_override : ($row['deskripsi'] ?: ($row['keterangan'] ?: '-')),
             'marketing_project_id' => $marketingProjectId,
             'marketing_site_id' => $marketingSiteId,
             'source' => 'api_project_site',

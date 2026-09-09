@@ -16,7 +16,7 @@ class Perusahaan extends CI_Controller
     public function index()
     {
         $data = [
-            'title'      => 'Operasional Web App | Perusahaan',
+            'title'      => 'Operational Cakra Application | Perusahaan',
             'header'     => 'Master Data',
             'subheader'  => 'Data Perusahaan',
             'perusahaan' => $this->perusahaan->getData(),

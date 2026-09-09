@@ -96,6 +96,10 @@
 
         <div class="card" id="proses-cetak">
             <div class="card-header">
+                <h5 class="card-title mb-0"><i class="ri-filter-3-line me-2"></i>Filter Report
+                </h5>
+            </div>
+            <div class="card-body">
                 <div class="row align-items-center gy-3">
                     <div class="col-sm">
                         <form action="<?= base_url('Report/exportActivity') ?>" method="post" id="form-export-activity">
@@ -174,11 +178,10 @@
                 <div class="alert alert-info mb-0">
                     <h6 class="alert-heading"><i class="ri-information-line me-2"></i>Petunjuk Penggunaan</h6>
                     <ul class="mb-0">
-                        <li>Pilih <strong>Project/Site</strong> terlebih dahulu agar tanggal mengikuti range project.
+                        <li>Pilih <strong>Project/Site</strong> untuk menentukan sumber data laporan.
                         </li>
                         <li>Pilih <strong>Proses</strong> untuk menentukan scope laporan operasional.</li>
-                        <li>Pilih <strong>Tanggal Awal</strong> dan <strong>Tanggal Akhir</strong> untuk menentukan
-                            periode laporan operasional.</li>
+                        <li>Pilih <strong>Tanggal Awal</strong> dan <strong>Tanggal Akhir</strong> secara bebas untuk menentukan periode laporan operasional.</li>
                         <li>Klik tombol <strong>Download PDF</strong> untuk mengunduh laporan dalam format PDF.
                         </li>
                         <li>Data yang ditampilkan berdasarkan pengeluaran operasional pada project terpilih.</li>
@@ -228,40 +231,6 @@
                 selectionCssClass: 'report-process-selection',
                 dropdownCssClass: 'report-process-dropdown'
             });
-        }
-
-        function setPickerRange() {
-            var selected = projectSelect.options[projectSelect.selectedIndex];
-            var minDate = selected ? selected.getAttribute('data-tgl-mulai') : '';
-            var maxDate = selected ? selected.getAttribute('data-tgl-selesai') : '';
-
-            if (startPicker && endPicker) {
-                startPicker.clear();
-                endPicker.clear();
-                startPicker.set('minDate', minDate || null);
-                startPicker.set('maxDate', maxDate || null);
-                endPicker.set('minDate', minDate || null);
-                endPicker.set('maxDate', maxDate || null);
-
-                if (minDate) {
-                    startPicker.setDate(minDate, false, 'Y-m-d');
-                }
-                if (maxDate) {
-                    endPicker.setDate(maxDate, false, 'Y-m-d');
-                }
-            } else {
-                startInput.value = minDate || '';
-                endInput.value = maxDate || '';
-                startInput.min = minDate || '';
-                startInput.max = maxDate || '';
-                endInput.min = minDate || '';
-                endInput.max = maxDate || '';
-            }
-        }
-
-        projectSelect.addEventListener('change', setPickerRange);
-        if (typeof $ !== 'undefined') {
-            $('#kode_project').on('select2:select select2:clear', setPickerRange);
         }
 
         if (exportForm && processSelect) {

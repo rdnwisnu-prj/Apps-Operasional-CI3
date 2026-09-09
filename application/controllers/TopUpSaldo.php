@@ -112,7 +112,7 @@ class TopUpSaldo extends CI_Controller
     private function pageData()
     {
         return [
-            'title'          => 'Operasional Web App | Top Up Saldo',
+            'title'          => 'Operational Cakra Application | Top Up Saldo',
             'header'         => 'Keuangan',
             'subheader'      => 'Top Up Saldo',
             'topup'          => $this->topup->getData(),

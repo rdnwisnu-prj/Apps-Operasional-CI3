@@ -21,7 +21,7 @@ class Profile extends CI_Controller
 		$id_user = $this->session->userdata('id_user');
 		
 		$data = [
-			'title'	=> 'Operasional Web App | Profile',
+			'title'	=> 'Operational Cakra Application | Profile',
 			'user'  => $this->user->getUserById($id_user),
 			'role'  => $this->role->getData()
 		];
@@ -54,7 +54,7 @@ class Profile extends CI_Controller
 
 		if ($this->form_validation->run() == FALSE) {
 			$data = [
-				'judul'	=> 'Operasional Web App |  Profile',
+				'judul'	=> 'Operational Cakra Application |  Profile',
 				'user'  => $this->user->getUserById($id_user),
 				'role'  => $this->role->getData()
 			];

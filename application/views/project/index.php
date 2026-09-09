@@ -125,8 +125,8 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                             <th>Perusahaan</th>
                             <th>Site</th>
                             <th>Periode</th>
-                            <th>Status Get</th>
                             <th>Korlap</th>
+                            <th>Keterangan</th>
                             <th class="text-end">Action</th>
                         </tr>
                     </thead>
@@ -138,25 +138,12 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                             <td style="width: 10%;"><span
                                     class="badge bg-primary-subtle text-primary"><?= html_escape($p['kode_project']); ?></span>
                             </td>
-                            <td><?= html_escape($p['nama_project']); ?></td>
-                            <td><?= html_escape($p['nama_perusahaan'] ?? '-'); ?></td>
-                            <td><?= html_escape($p['nama_site'] ?? '-'); ?></td>
+                            <td class="text-wrap"><?= html_escape($p['nama_project']); ?></td>
+                            <td class="text-wrap"><?= html_escape($p['nama_perusahaan'] ?? '-'); ?></td>
+                            <td class="text-wrap"><?= html_escape($p['nama_site'] ?? '-'); ?></td>
                             <td>
                                 <?= !empty($p['tgl_mulai']) ? tanggal_indonesia_medium($p['tgl_mulai']) : '-'; ?> -
                                 <?= !empty($p['tgl_selesai']) ? tanggal_indonesia_medium($p['tgl_selesai']) : '-'; ?>
-                            </td>
-                            <td>
-                                <?php if (($p['source'] ?? '') === 'api_project_site'): ?>
-                                <span class="badge bg-success-subtle text-success">
-                                    <i class="ti ti-circle-check me-1"></i>Sudah Get
-                                </span>
-                                <?php if (!empty($p['marketing_site_id'])): ?>
-                                <small class="d-block text-muted">Site ID:
-                                    <?= (int) $p['marketing_site_id']; ?></small>
-                                <?php endif; ?>
-                                <?php else: ?>
-                                <span class="badge bg-secondary-subtle text-secondary">Manual</span>
-                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php if (!empty($p['korlap_rows'])): ?>
@@ -175,6 +162,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                                 -
                                 <?php endif; ?>
                             </td>
+                            <td class="text-wrap"><?= html_escape($p['deskripsi'] ?? '-'); ?></td>
                             <td class="text-end">
                                 <div class="dropdown table-action">
                                     <button class="action-icon btn btn-xs shadow btn-icon btn-outline-light"
@@ -255,7 +243,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Project</label>
-                                <input type="text" class="form-control bg-white js-info-project" readonly>
+                                <input type="text" class="form-control bg-white js-info-project" name="nama_project" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Site</label>
@@ -354,7 +342,7 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Project</label>
-                                <input type="text" class="form-control bg-white js-info-project" readonly>
+                                <input type="text" class="form-control bg-white js-info-project" name="nama_project" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Site</label>
@@ -485,7 +473,8 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
                 if (this.value && (range.minDate || range.maxDate)) {
                     var selected = this.value;
-                    if ((range.minDate && selected < range.minDate) || (range.maxDate && selected > range.maxDate)) {
+                    if ((range.minDate && selected < range.minDate) || (range.maxDate && selected >
+                            range.maxDate)) {
                         this._flatpickr.clear();
                     }
                 }
@@ -648,15 +637,19 @@ $json_flags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
             $form[0].reset();
             $form.find('[name="kode_project"]').val(data.kode_project || '');
             $form.find('#edit_kode_project_display').val(data.kode_project || '');
-            ensureMarketingOption($form.find('.js-marketing-project-site'), data.marketing_key || '', data);
-            $form.find('.js-marketing-project-site').prop('disabled', (data.source || '') === 'api_project_site');
+            ensureMarketingOption($form.find('.js-marketing-project-site'), data.marketing_key || '',
+                data);
+            $form.find('.js-marketing-project-site').prop('disabled', (data.source || '') ===
+                'api_project_site');
             setSelectValue($form.find('.js-marketing-project-site'), data.marketing_key || '');
             applyMarketingProjectSite($form, data.marketing_key || '', data);
             var marketingData = marketingSiteData[data.marketing_key || ''] || {};
-            setDate($form.find('[name="tgl_mulai"]'), marketingData.tgl_pelaksanaan || marketingData.tgl_mulai ||
+            setDate($form.find('[name="tgl_mulai"]'), marketingData.tgl_pelaksanaan || marketingData
+                .tgl_mulai ||
                 data.tgl_mulai || '');
-            setDate($form.find('[name="tgl_selesai"]'), marketingData.tgl_selesai || data.tgl_selesai || '');
-            $form.find('[name="deskripsi"]').val(data.deskripsi || '');
+            setDate($form.find('[name="tgl_selesai"]'), marketingData.tgl_selesai || data.tgl_selesai ||
+                '');
+            $form.find('[name="deskripsi"]').val(data.deskripsi || '-');
             renderKorlap($form, data.korlap || []);
             initFlatpickr($form);
             syncKorlapDateRange($form);

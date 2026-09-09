@@ -32,7 +32,7 @@ class KeluhanClient extends CI_Controller
         }
 
         $data = [
-            'title'             => 'Operasional Web App | Report Keluhan Client',
+            'title'             => 'Operational Cakra Application | Report Keluhan Client',
             'header'            => 'Reports',
             'subheader'         => 'Report Keluhan Client',
             'current_year'      => $current_year,

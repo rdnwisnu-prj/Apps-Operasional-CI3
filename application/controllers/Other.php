@@ -15,7 +15,7 @@ class Other extends CI_Controller
     public function index()
     {
         $data = [
-            'title'     => 'Operasional Web App | Biaya Other',
+            'title'     => 'Operational Cakra Application | Biaya Other',
             'header'    => 'Keuangan',
             'subheader' => 'Biaya Other',
             'other'     => $this->other->getData(),

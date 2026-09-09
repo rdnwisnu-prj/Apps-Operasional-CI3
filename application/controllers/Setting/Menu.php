@@ -14,7 +14,7 @@ class Menu extends CI_Controller
 	public function index()
 	{
         $data = [
-            'title'     => 'Operasional Web App | Setting Menu',
+            'title'     => 'Operational Cakra Application | Setting Menu',
             'header'    => 'Pengaturan',
             'subheader' => 'Menu',
             'menus'     => $this->menu->getData(),
@@ -35,7 +35,7 @@ class Menu extends CI_Controller
         if ($this->form_validation->run() == FALSE) {
     
             $data = [
-                'title'     => 'Operasional Web App | Setting Menu',
+                'title'     => 'Operational Cakra Application | Setting Menu',
                 'header'    => 'Pengaturan',
                 'subheader' => 'Menu',
                 'menus'     => $this->menu->getData(),
@@ -71,7 +71,7 @@ class Menu extends CI_Controller
         $edit_data = $this->menu->getMenusById($id_menu);
         
         $data = [
-            'title'     => 'Operasional Web App | Setting Menu',
+            'title'     => 'Operational Cakra Application | Setting Menu',
             'header'    => 'Pengaturan',
             'subheader' => 'Menu',
             'menus'     => $this->menu->getData(),
@@ -97,7 +97,7 @@ class Menu extends CI_Controller
             $edit_data = $this->menu->getMenusById($id_menu);
     
             $data = [
-                'title'     => 'Operasional Web App | Setting Menu',
+                'title'     => 'Operational Cakra Application | Setting Menu',
                 'header'    => 'Pengaturan',
                 'subheader' => 'Menu',
                 'menus'     => $this->menu->getData(),
@@ -139,7 +139,7 @@ class Menu extends CI_Controller
     public function Submenu($id_menu)
     {
         $data = [
-            'title'     => 'Operasional Web App | Setting Sub Menu',
+            'title'     => 'Operational Cakra Application | Setting Sub Menu',
             'header'    => 'Pengaturan',
             'subheader' => 'Sub Menu',
             'menu'      => $this->menu->getMenus($id_menu),
@@ -168,7 +168,7 @@ class Menu extends CI_Controller
         if ($this->form_validation->run() == FALSE) {
             
             $data = [
-                'title'     => 'Operasional Web App | Setting Sub Menu',
+                'title'     => 'Operational Cakra Application | Setting Sub Menu',
                 'header'    => 'Pengaturan',
                 'subheader' => 'Sub Menu',
                 'menu'      => $this->menu->getMenus($id_menu),
@@ -200,7 +200,7 @@ class Menu extends CI_Controller
         $edit_data = $this->menu->getDetailSubmenu($id_submenu);
 
         $data = [
-            'title'     => 'Operasional Web App | Setting Sub Menu',
+            'title'     => 'Operational Cakra Application | Setting Sub Menu',
             'header'    => 'Pengaturan',
             'subheader' => 'Sub Menu',
             'menu'      => $this->menu->getMenus($id_menu),
@@ -234,7 +234,7 @@ class Menu extends CI_Controller
             $edit_data = $this->menu->getDetailSubmenu($id_submenu);
             
             $data = [
-                'title'     => 'Operasional Web App | Setting Sub Menu',
+                'title'     => 'Operational Cakra Application | Setting Sub Menu',
                 'header'    => 'Pengaturan',
                 'subheader' => 'Sub Menu',
                 'menu'      => $this->menu->getMenus($id_menu),

@@ -17,7 +17,7 @@ class Report extends CI_Controller
         $role_id = $this->session->userdata('role_id');
         
         $data = [
-            'title'             => 'Operasional Web App | Report Project',
+            'title'             => 'Operational Cakra Application | Report Project',
             'header'            => 'Laporan & Pengaturan',
             'subheader'         => 'Report Project',
             'projects'          => $this->getReportProjects(),
@@ -136,9 +136,7 @@ class Report extends CI_Controller
 
         $dateRange = $this->normalizeDateRange(
             $this->input->post('tgl_awal', true),
-            $this->input->post('tgl_akhir', true),
-            $project['tgl_mulai'] ?? null,
-            $project['tgl_selesai'] ?? null
+            $this->input->post('tgl_akhir', true)
         );
 
         if (!$dateRange) {
@@ -375,20 +373,10 @@ class Report extends CI_Controller
         return !empty($labels) ? implode(', ', $labels) : '-';
     }
 
-    private function normalizeDateRange($start, $end, $projectStart, $projectEnd)
+    private function normalizeDateRange($start, $end)
     {
         $start = (string) $start;
         $end = (string) $end;
-        $projectStart = $projectStart ?: $start;
-        $projectEnd = $projectEnd ?: $end;
-
-        if ($start < $projectStart) {
-            $start = $projectStart;
-        }
-
-        if ($end > $projectEnd) {
-            $end = $projectEnd;
-        }
 
         if ($start > $end) {
             return false;

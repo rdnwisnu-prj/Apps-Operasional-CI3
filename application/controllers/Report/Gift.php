@@ -12,7 +12,7 @@ class Gift extends CI_Controller
 	public function index()
 	{
         $data = [
-            'title' => 'Operasional Web App | Under Maintenance',
+            'title' => 'Operational Cakra Application | Under Maintenance',
         ];
 
         $this->load->view('auth/maintenance', $data);

@@ -30,7 +30,7 @@ class FeeDokterRetail extends CI_Controller
         }
 
         $data = [
-            'title'       => 'Operasional Web App | ' . $this->pageLabel,
+            'title'       => 'Operational Cakra Application | ' . $this->pageLabel,
             'header'      => 'Keuangan',
             'subheader'   => 'Data ' . $this->pageLabel,
             'fee_dokter'  => $this->fee_dokter->getData(),
@@ -280,7 +280,7 @@ class FeeDokterRetail extends CI_Controller
     private function formData($subheader)
     {
         return [
-            'title'       => 'Operasional Web App | ' . $subheader,
+            'title'       => 'Operational Cakra Application | ' . $subheader,
             'header'      => 'Keuangan',
             'subheader'   => $subheader,
             'cabang'      => $this->fee_dokter->getCabang(),

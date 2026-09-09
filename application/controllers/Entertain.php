@@ -19,7 +19,7 @@ class Entertain extends CI_Controller
     public function index()
     {
         $data = [
-            'title'      => 'Operasional Web App | Biaya Entertain',
+            'title'      => 'Operational Cakra Application | Biaya Entertain',
             'header'     => 'Keuangan',
             'subheader'  => 'Biaya Entertain',
             'entertain'  => $this->entertain->getData(),

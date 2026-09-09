@@ -13,7 +13,7 @@ class Dashboard extends CI_Controller
     public function index()
     {
         $data = [
-            'title' => 'Operasional Web App | Login',
+            'title' => 'Operational Cakra Application | Login',
         ];
         
         $this->load->view('templates/header', $data);

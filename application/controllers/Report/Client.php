@@ -41,7 +41,7 @@ class Client extends CI_Controller
         }
 
         $data = [
-            'title'             => 'Operasional Web App | Report Client',
+            'title'             => 'Operational Cakra Application | Report Client',
             'header'            => 'Reports',
             'subheader'         => 'Report Client',
             'current_year'      => $current_year,

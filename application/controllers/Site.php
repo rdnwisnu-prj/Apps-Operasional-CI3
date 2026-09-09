@@ -16,7 +16,7 @@ class Site extends CI_Controller
     public function index()
     {
         $data = [
-            'title'      => 'Operasional Web App | Site Perusahaan',
+            'title'      => 'Operational Cakra Application | Site Perusahaan',
             'header'     => 'Master Data',
             'subheader'  => 'Site Perusahaan',
             'site'       => $this->site->getData(),

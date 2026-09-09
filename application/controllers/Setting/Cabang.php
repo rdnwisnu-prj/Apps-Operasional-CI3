@@ -14,7 +14,7 @@ class Cabang extends CI_Controller
 	public function index()
 	{
         $data = [
-            'title'     => 'Operasional Web App | Setting Cabang',
+            'title'     => 'Operational Cakra Application | Setting Cabang',
             'header'    => 'Pengaturan',
             'subheader' => 'Cabang',
             'cabang'    => $this->cabang->getData(),
@@ -33,7 +33,7 @@ class Cabang extends CI_Controller
         if ($this->form_validation->run() == FALSE) {
 
             $data = [
-                'title'     => 'Operasional Web App | Setting Cabang',
+                'title'     => 'Operational Cakra Application | Setting Cabang',
                 'header'    => 'Pengaturan',
                 'subheader' => 'Cabang',
                 'cabang'    => $this->cabang->getData(),
@@ -63,7 +63,7 @@ class Cabang extends CI_Controller
         $edit_data = $this->cabang->getCabangsById($id_cabang);
         
         $data = [
-            'title'     => 'Operasional Web App | Setting Cabang',
+            'title'     => 'Operational Cakra Application | Setting Cabang',
             'header'    => 'Pengaturan',
             'subheader' => 'Cabang',
             'cabang'    => $this->cabang->getData(),
@@ -87,7 +87,7 @@ class Cabang extends CI_Controller
             $edit_data = $this->cabang->getcabangsById($id_cabang);
     
             $data = [
-                'title'     => 'Operasional Web App | Setting Cabang',
+                'title'     => 'Operational Cakra Application | Setting Cabang',
                 'header'    => 'Pengaturan',
                 'subheader' => 'Cabang',    
                 'cabang'    => $this->cabang->getData(),

@@ -15,7 +15,7 @@ class Role extends CI_Controller
 	public function index()
 	{
         $data = [
-            'title'     => 'Operasional Web App | Role & Access',
+            'title'     => 'Operational Cakra Application | Role & Access',
             'header'    => 'Pengaturan',
             'subheader' => 'Role & Access',
             'roles'     => $this->role->getData(),

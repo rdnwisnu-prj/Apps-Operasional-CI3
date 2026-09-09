@@ -17,7 +17,7 @@ class User extends CI_Controller
 	public function index()
 	{
         $data = [
-            'title'     => 'Operasional Web App | Setting User',
+            'title'     => 'Operational Cakra Application | Setting User',
             'header'    => 'Pengaturan',
             'subheader' => 'User',
             'user'      => $this->user->getData(),
@@ -44,7 +44,7 @@ class User extends CI_Controller
         if ($this->form_validation->run() == FALSE) {
             
             $data = [
-                'title'     => 'Operasional Web App | Setting User',
+                'title'     => 'Operational Cakra Application | Setting User',
                 'header'    => 'Pengaturan',
                 'subheader' => 'User',
                 'user'      => $this->user->getData(),
@@ -83,7 +83,7 @@ class User extends CI_Controller
         $edit_data = $this->user->getUserById($id_user);
         
         $data = [
-            'title'     => 'Operasional Web App | Setting User',
+            'title'     => 'Operational Cakra Application | Setting User',
             'header'    => 'Pengaturan',
             'subheader' => 'User',
             'user'      => $this->user->getData(),

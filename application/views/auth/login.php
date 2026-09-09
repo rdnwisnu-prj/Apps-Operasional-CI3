@@ -6,11 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title><?= html_escape($title); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="<?= base_url('assets/img/logo/favicon.png'); ?>">
+    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon-cakra.png'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/libs/sweetalert2/sweetalert2.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/template/crms/assets/css/bootstrap.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/template/crms/assets/plugins/icons/remix/remixicon.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/login.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/style.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/custom.css'); ?>">
 </head>
 
@@ -42,7 +43,7 @@
             </div>
             <div class="login-card">
                 <div class="text-center">
-                    <img src="<?= base_url('assets/img/logo/transparent.png'); ?>" class="login-logo mx-auto"
+                    <img src="<?= base_url('assets/img/logo-cakra.png'); ?>" class="login-logo mx-auto"
                         alt="Cakra Corp">
                     <h2>Selamat Datang</h2>
                     <p class="subtitle">Masuk untuk mengakses dashboard Aplikasi Operasional.</p>
@@ -74,7 +75,16 @@
                                 aria-pressed="false"><i class="ri-eye-off-line align-middle"></i></button>
                         </div>
                     </div>
-                    <button type="submit" class="login-btn mt-2">Masuk Dashboard</button>
+                    <div class="login-options">
+                        <div class="form-check form-check-md d-flex align-items-center">
+                            <input class="form-check-input mt-0" type="checkbox" value="" id="remember-login" checked>
+                            <label class="form-check-label ms-2" for="remember-login">Remember me</label>
+                        </div>
+                        <a href="<?= base_url('Auth/ForgotPassword') ?>">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="login-btn mt-2"> <span>Masuk</span>
+                        <i class="ri-arrow-right-circle-line"></i></button>
                 </form>
                 <div class="login-card-note"><i class="ri-shield-check-line"></i> Akses aman untuk tim internal
                     perusahaan.</div>

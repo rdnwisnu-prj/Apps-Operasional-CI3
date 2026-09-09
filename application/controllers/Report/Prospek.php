@@ -40,7 +40,7 @@ class Prospek extends CI_Controller
         }
         
         $data = [
-            'title'             => 'Operasional Web App | Report Prospek',
+            'title'             => 'Operational Cakra Application | Report Prospek',
             'header'            => 'Reports',
             'subheader'         => 'Report Prospek',
             'current_year'      => $current_year,

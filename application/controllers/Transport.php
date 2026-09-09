@@ -23,7 +23,7 @@ class Transport extends CI_Controller
     public function index()
     {
         $data = [
-            'title'     => 'Operasional Web App | Transport',
+            'title'     => 'Operational Cakra Application | Transport',
             'header'    => 'Keuangan',
             'subheader' => 'Transport',
             'transport' => $this->transport->getData(),
@@ -38,7 +38,7 @@ class Transport extends CI_Controller
 
     public function Store()
     {
-        $data = $this->formData('Operasional Web App | Tambah Transport');
+        $data = $this->formData('Operational Cakra Application | Tambah Transport');
 
         if ($this->input->method(TRUE) !== 'POST') {
             redirect('Transport');
@@ -130,7 +130,7 @@ class Transport extends CI_Controller
             return;
         }
 
-        $data = $this->formData('Operasional Web App | Edit Transport', $edit_data);
+        $data = $this->formData('Operational Cakra Application | Edit Transport', $edit_data);
         $this->forcePelaksanaanMcuProses();
         $this->setRules();
 

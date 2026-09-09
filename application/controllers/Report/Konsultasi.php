@@ -39,7 +39,7 @@ class Konsultasi extends CI_Controller
         }
         
         $data = [
-            'title'             => 'Operasional Web App | Report Konsultasi',
+            'title'             => 'Operational Cakra Application | Report Konsultasi',
             'header'            => 'Reports',
             'subheader'         => 'Report Konsultasi',
             'current_year'      => $current_year,

@@ -19,7 +19,7 @@ class Penginapan extends CI_Controller
     public function index()
     {
         $data = [
-            'title'      => 'Operasional Web App | Biaya Penginapan',
+            'title'      => 'Operational Cakra Application | Biaya Penginapan',
             'header'     => 'Keuangan',
             'subheader'  => 'Biaya Penginapan',
             'penginapan' => $this->penginapan->getData(),
@@ -34,7 +34,7 @@ class Penginapan extends CI_Controller
 
     public function Store()
     {
-        $data = $this->formData('Operasional Web App | Tambah Biaya Penginapan');
+        $data = $this->formData('Operational Cakra Application | Tambah Biaya Penginapan');
 
         if ($this->input->method(TRUE) !== 'POST') {
             redirect('Penginapan');
@@ -108,7 +108,7 @@ class Penginapan extends CI_Controller
             return;
         }
 
-        $data = $this->formData('Operasional Web App | Edit Biaya Penginapan', $edit_data);
+        $data = $this->formData('Operational Cakra Application | Edit Biaya Penginapan', $edit_data);
         $this->forcePelaksanaanMcuProses();
         $this->setRules();
 

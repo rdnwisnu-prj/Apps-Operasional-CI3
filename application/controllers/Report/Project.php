@@ -20,7 +20,7 @@ class Project extends CI_Controller
         $role_id = $this->session->userdata('role_id');
         
         $data = [
-            'title'             => 'Operasional Web App | Report',
+            'title'             => 'Operational Cakra Application | Report',
             'header'            => 'Laporan & Pengaturan',
             'subheader'         => 'Laporan',
             'current_year'      => $current_year,

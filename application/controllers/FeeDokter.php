@@ -27,7 +27,7 @@ class FeeDokter extends CI_Controller
         }
 
         $data = [
-            'title'      => 'Operasional Web App | Fee Dokter',
+            'title'      => 'Operational Cakra Application | Fee Dokter',
             'header'     => 'Keuangan',
             'subheader'  => 'Data Fee Dokter',
             'fee_dokter' => $this->fee_dokter->getData(),
@@ -183,7 +183,7 @@ class FeeDokter extends CI_Controller
     public function Store()
     {
         $data = [
-            'title'      => 'Operasional Web App | Tambah Fee Dokter',
+            'title'      => 'Operational Cakra Application | Tambah Fee Dokter',
             'header'     => 'Keuangan',
             'subheader'  => 'Tambah Fee Dokter',
             'projects'   => $this->fee_dokter->getProjects(),
@@ -303,7 +303,7 @@ class FeeDokter extends CI_Controller
         }
 
         $data = [
-            'title'      => 'Operasional Web App | Edit Fee Dokter',
+            'title'      => 'Operational Cakra Application | Edit Fee Dokter',
             'header'     => 'Keuangan',
             'subheader'  => 'Edit Fee Dokter',
             'edit_data'  => $edit_data,
@@ -333,7 +333,7 @@ class FeeDokter extends CI_Controller
             $edit_data = $this->fee_dokter->getById($id);
 
             $data = [
-                'title'      => 'Operasional Web App | Edit Fee Dokter',
+                'title'      => 'Operational Cakra Application | Edit Fee Dokter',
                 'header'     => 'Keuangan',
                 'subheader'  => 'Edit Fee Dokter',
                 'edit_data'  => $edit_data,

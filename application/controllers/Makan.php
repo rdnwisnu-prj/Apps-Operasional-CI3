@@ -19,7 +19,7 @@ class Makan extends CI_Controller
     public function index()
     {
         $data = [
-            'title'     => 'Operasional Web App | Biaya Makan',
+            'title'     => 'Operational Cakra Application | Biaya Makan',
             'header'    => 'Keuangan',
             'subheader' => 'Biaya Makan',
             'makan'     => $this->makan->getData(),

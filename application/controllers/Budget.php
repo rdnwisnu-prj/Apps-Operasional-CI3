@@ -16,7 +16,7 @@ class Budget extends CI_Controller
 	public function index()
 	{
         $data = [
-            'title'      => 'Operasional Web App |  Budget Project',
+            'title'      => 'Operational Cakra Application |  Budget Project',
             'header'     => 'Keuangan',
             'subheader'  => 'Budget Project',
             'budget'     => $this->budget->getData(),
@@ -39,7 +39,7 @@ class Budget extends CI_Controller
         if ($this->form_validation->run() == FALSE) {
 
             $data = [
-                'title'      => 'Operasional Web App |  Budget Project',
+                'title'      => 'Operational Cakra Application |  Budget Project',
                 'header'     => 'Keuangan',
                 'subheader'  => 'Budget Project',
                 'budget'     => $this->budget->getData(),
@@ -77,7 +77,7 @@ class Budget extends CI_Controller
         $edit_data = $this->budget->getBudgetById($id_budget);
         
         $data = [
-            'title'      => 'Operasional Web App |  Budget Project',
+            'title'      => 'Operational Cakra Application |  Budget Project',
             'header'     => 'Keuangan',
             'subheader'  => 'Budget Project',
             'budget'     => $this->budget->getData(),
@@ -105,7 +105,7 @@ class Budget extends CI_Controller
             $edit_data = $this->budget->getBudgetById($id_budget);
     
             $data = [
-                'title'      => 'Operasional Web App |  Budget Project',
+                'title'      => 'Operational Cakra Application |  Budget Project',
                 'header'     => 'Keuangan',
                 'subheader'  => 'Budget Project',
                 'budget'     => $this->budget->getData(),
