@@ -81,7 +81,7 @@ class FeeDokter_model extends CI_Model
 
     public function getProjects()
     {
-        $this->db->select('kode_project, nama_project, tgl_mulai, tgl_selesai');
+        $this->db->select('kode_project, nama_project, nama_site ,tgl_mulai, tgl_selesai');
         $this->db->from('tab_project');
         $this->db->order_by('nama_project', 'ASC');
         return $this->db->get()->result_array();
