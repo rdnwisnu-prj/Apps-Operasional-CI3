@@ -28,7 +28,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 p-0">
                     <li class="breadcrumb-item"><a href="javascript:void(0);"><?= $header; ?></a></li>
-                    <li class="breadcrumb-item"><a href="<?= base_url($baseRoute); ?>"><?= html_escape($pageLabel); ?></a></li>
+                    <li class="breadcrumb-item"><a
+                            href="<?= base_url($baseRoute); ?>"><?= html_escape($pageLabel); ?></a></li>
                     <li class="breadcrumb-item active"><?= $subheader; ?></li>
                 </ol>
             </nav>
@@ -58,7 +59,8 @@
                                 <?php foreach ($projects as $p): ?>
                                 <option value="<?= html_escape($p['kode_project']); ?>"
                                     <?= set_select('project', $p['kode_project']); ?>>
-                                    <?= html_escape($p['kode_project'] . ' - ' . $p['nama_project']); ?>
+                                    <?= html_escape($p['kode_project'] . ' - ' . $p['nama_perusahaan']) ; ?> -
+                                    <?= html_escape($p['nama_site']); ?>
                                 </option>
                                 <?php endforeach; ?>
                             </select>

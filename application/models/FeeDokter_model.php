@@ -81,8 +81,10 @@ class FeeDokter_model extends CI_Model
 
     public function getProjects()
     {
-        $this->db->select('kode_project, nama_project, nama_site ,tgl_mulai, tgl_selesai');
+        $this->db->select('kode_project, nama_project, tab_perusahaan.nama_perusahaan, tab_site.nama_site, ,tgl_mulai, tgl_selesai');
         $this->db->from('tab_project');
+        $this->db->join('tab_perusahaan', 'tab_perusahaan.id_perusahaan = tab_project.perusahaan_id', 'left');
+        $this->db->join('tab_site', 'tab_site.id_site = tab_project.site_id', 'left');
         $this->db->order_by('nama_project', 'ASC');
         return $this->db->get()->result_array();
     }
