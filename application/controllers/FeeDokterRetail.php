@@ -33,7 +33,7 @@ class FeeDokterRetail extends CI_Controller
             'title'       => 'Operational Cakra Application | ' . $this->pageLabel,
             'header'      => 'Keuangan',
             'subheader'   => 'Data ' . $this->pageLabel,
-            'fee_dokter'  => $this->fee_dokter->getData(),
+            'fee_dokter'  => $this->fee_dokter->getData($this->getVisibilityFilters()),
             'list_cabang' => $this->fee_dokter->getCabang(),
             'list_dokter' => $this->fee_dokter->getDokter(),
             'f_bulan'     => '',
@@ -105,7 +105,20 @@ class FeeDokterRetail extends CI_Controller
             $filters['pph21'] = (int) $pph;
         }
 
-        return $filters;
+        return array_merge($filters, $this->getVisibilityFilters());
+    }
+
+    private function getVisibilityFilters()
+    {
+        $roleId = (int) $this->session->userdata('role_id');
+
+        if (in_array($roleId, [1, 2, 3], true)) {
+            return [];
+        }
+
+        return [
+            'user_id' => (int) $this->session->userdata('id_user'),
+        ];
     }
 
     private function formatFilterRow($row, $no)
@@ -212,7 +225,7 @@ class FeeDokterRetail extends CI_Controller
 
     public function edit($id)
     {
-        $edit_data = $this->fee_dokter->getById($id);
+        $edit_data = $this->fee_dokter->getById($id, $this->getVisibilityFilters());
         if (!$edit_data) {
             $this->session->set_flashdata('error', 'Data tidak ditemukan');
             redirect($this->route);
@@ -228,11 +241,19 @@ class FeeDokterRetail extends CI_Controller
     public function update()
     {
         $id = $this->input->post('id_fee');
+        $existing = $this->fee_dokter->getById($id, $this->getVisibilityFilters());
+
+        if (!$existing) {
+            $this->session->set_flashdata('error', 'Data tidak ditemukan atau tidak dapat diakses');
+            redirect($this->route);
+            return;
+        }
+
         $this->setRules();
 
         if ($this->form_validation->run() == FALSE) {
             $data = $this->formData('Edit ' . $this->pageLabel);
-            $data['edit_data'] = $this->fee_dokter->getById($id);
+            $data['edit_data'] = $existing;
             $data['rekening'] = $this->fee_dokter->getRekeningByFee($id);
             $this->renderForm('fee_dokter/edit', $data);
             return;
@@ -245,7 +266,7 @@ class FeeDokterRetail extends CI_Controller
             return;
         }
 
-        $old = $this->fee_dokter->getById($id);
+        $old = $existing;
         $lampiran = $old['lampiran'] ?? '';
         if (!empty($_FILES['lampiran']['name'])) {
             $newLampiran = $this->uploadLampiran();
@@ -267,12 +288,15 @@ class FeeDokterRetail extends CI_Controller
 
     public function destroy($id)
     {
-        $data = $this->fee_dokter->getById($id);
-        if ($data) {
-            $this->deleteLampiranFile($data['lampiran'] ?? '');
-            $this->fee_dokter->deleteData($id);
+        $data = $this->fee_dokter->getById($id, $this->getVisibilityFilters());
+        if (!$data) {
+            $this->session->set_flashdata('error', 'Data tidak ditemukan atau tidak dapat diakses');
+            redirect($this->route);
+            return;
         }
 
+        $this->deleteLampiranFile($data['lampiran'] ?? '');
+        $this->fee_dokter->deleteData($id);
         $this->session->set_flashdata('flash', 'Dihapus');
         redirect($this->route);
     }

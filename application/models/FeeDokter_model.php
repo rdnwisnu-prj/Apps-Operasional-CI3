@@ -14,6 +14,9 @@ class FeeDokter_model extends CI_Model
         $this->db->join('tab_dokter d', 'd.id_dokter = tab_fee_dokter.dokter_id', 'left');
         $this->db->join('tab_fee_rekening r', 'r.id_fee = tab_fee_dokter.id_fee AND r.is_active = 1', 'left');
 
+        if (array_key_exists('user_id', $filters)) {
+            $this->db->where('tab_fee_dokter.user_id', (int) $filters['user_id']);
+        }
         if (!empty($filters['bulan'])) {
             $this->db->where('MONTH(tab_fee_dokter.tgl_project)', $filters['bulan']);
         }
@@ -38,9 +41,14 @@ class FeeDokter_model extends CI_Model
         return $this->db->get()->result_array();
     }
 
-    public function getById($id)
+    public function getById($id, $filters = [])
     {
-        return $this->db->get_where('tab_fee_dokter', ['id_fee' => $id])->row_array();
+        $this->db->where('id_fee', $id);
+        if (array_key_exists('user_id', $filters)) {
+            $this->db->where('user_id', (int) $filters['user_id']);
+        }
+
+        return $this->db->get('tab_fee_dokter')->row_array();
     }
 
     public function getDokter()
@@ -136,9 +144,12 @@ class FeeDokter_model extends CI_Model
         return $this->db->get()->result_array();
     }
 
-    public function getLatestByNamaDokter($nama)
+    public function getLatestByNamaDokter($nama, $filters = [])
     {
         $this->db->where('nama_dokter', $nama);
+        if (array_key_exists('user_id', $filters)) {
+            $this->db->where('user_id', (int) $filters['user_id']);
+        }
         $this->db->order_by('created_at', 'DESC');
         $this->db->limit(1);
         $row = $this->db->get('tab_fee_dokter')->row_array();

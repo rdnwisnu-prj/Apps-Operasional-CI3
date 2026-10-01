@@ -30,7 +30,7 @@ class FeeDokter extends CI_Controller
             'title'      => 'Operational Cakra Application | Fee Dokter',
             'header'     => 'Keuangan',
             'subheader'  => 'Data Fee Dokter',
-            'fee_dokter' => $this->fee_dokter->getData(),
+            'fee_dokter' => $this->fee_dokter->getData($this->getVisibilityFilters()),
             'list_cabang'=> $this->fee_dokter->getCabang(),
             'list_dokter'=> $this->fee_dokter->getDokter(),
             'f_bulan'    => '',
@@ -102,7 +102,20 @@ class FeeDokter extends CI_Controller
             $filters['pph21'] = (int) $pph;
         }
 
-        return $filters;
+        return array_merge($filters, $this->getVisibilityFilters());
+    }
+
+    private function getVisibilityFilters()
+    {
+        $roleId = (int) $this->session->userdata('role_id');
+
+        if (in_array($roleId, [1, 2, 3], true)) {
+            return [];
+        }
+
+        return [
+            'user_id' => (int) $this->session->userdata('id_user'),
+        ];
     }
 
     private function formatFilterRow($row, $no)
@@ -294,7 +307,7 @@ class FeeDokter extends CI_Controller
 
     public function edit($id)
     {
-        $edit_data = $this->fee_dokter->getById($id);
+        $edit_data = $this->fee_dokter->getById($id, $this->getVisibilityFilters());
 
         if (!$edit_data) {
             $this->session->set_flashdata('error', 'Data tidak ditemukan');
@@ -322,6 +335,13 @@ class FeeDokter extends CI_Controller
     public function update()
     {
         $id = $this->input->post('id_fee');
+        $existing = $this->fee_dokter->getById($id, $this->getVisibilityFilters());
+
+        if (!$existing) {
+            $this->session->set_flashdata('error', 'Data tidak ditemukan atau tidak dapat diakses');
+            redirect('FeeDokter');
+            return;
+        }
 
         $this->form_validation->set_rules('project', 'Project', 'required');
         $this->form_validation->set_rules('dokter_id', 'Nama Dokter', 'required|integer');
@@ -330,13 +350,11 @@ class FeeDokter extends CI_Controller
         $this->form_validation->set_rules('total', 'Total', 'required|numeric');
 
         if ($this->form_validation->run() == FALSE) {
-            $edit_data = $this->fee_dokter->getById($id);
-
             $data = [
                 'title'      => 'Operational Cakra Application | Edit Fee Dokter',
                 'header'     => 'Keuangan',
                 'subheader'  => 'Edit Fee Dokter',
-                'edit_data'  => $edit_data,
+                'edit_data'  => $existing,
                 'projects'   => $this->fee_dokter->getProjects(),
                 'cabang'     => $this->fee_dokter->getCabang(),
                 'dokter'     => $this->fee_dokter->getDokter(),
@@ -359,7 +377,7 @@ class FeeDokter extends CI_Controller
             $pph21 = (int) $this->input->post('pph21', true);
             $tax = $this->calculateTax($total, $pph21);
 
-            $old_data = $this->fee_dokter->getById($id);
+            $old_data = $existing;
             $lampiran = $old_data['lampiran'];
             $upload_path = FCPATH . 'uploads' . DIRECTORY_SEPARATOR . 'lampiran' . DIRECTORY_SEPARATOR;
             if (!is_dir($upload_path)) {
@@ -443,9 +461,15 @@ class FeeDokter extends CI_Controller
     public function destroy($id)
     {
         // Delete lampiran file if exists
-        $data = $this->fee_dokter->getById($id);
+        $data = $this->fee_dokter->getById($id, $this->getVisibilityFilters());
+        if (!$data) {
+            $this->session->set_flashdata('error', 'Data tidak ditemukan atau tidak dapat diakses');
+            redirect('FeeDokter');
+            return;
+        }
+
         $upload_path = FCPATH . 'uploads' . DIRECTORY_SEPARATOR . 'lampiran' . DIRECTORY_SEPARATOR;
-        if ($data && !empty($data['lampiran']) && file_exists($upload_path . $data['lampiran'])) {
+        if (!empty($data['lampiran']) && file_exists($upload_path . $data['lampiran'])) {
             unlink($upload_path . $data['lampiran']);
         }
 
@@ -508,7 +532,7 @@ class FeeDokter extends CI_Controller
     public function getDetailByNamaDokter()
     {
         $nama = $this->input->get('nama', true);
-        $result = $this->fee_dokter->getLatestByNamaDokter($nama);
+        $result = $this->fee_dokter->getLatestByNamaDokter($nama, $this->getVisibilityFilters());
 
         if ($result) {
             $response = [
