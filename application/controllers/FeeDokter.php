@@ -126,7 +126,7 @@ class FeeDokter extends CI_Controller
                 . '<small class="d-block text-muted">' . html_escape($row['jenis_biaya_tambahan']) . '</small>';
         }
 
-        $keterangan = $row['keterangan'] ?: ($row['nama_project'] ?? $row['project']);
+        $keterangan = $row['keterangan'] ?: '-';
         $tanggal = !empty($row['tgl_project']) ? tanggal_indonesia_medium(date($row['tgl_project'])) : '-';
         $pajak = ($row['pph21'] == 1) ? $row['jumlah_pph'] : $row['jumlah_nopph'];
         $jenisPajak = ($row['pph21'] == 1)
@@ -625,7 +625,7 @@ class FeeDokter extends CI_Controller
             $rekeningBank = $f['rek_bank'] ?: $f['bank'];
             $rekeningKcp = $f['rek_kcp'] ?: $f['kcp'];
             $rekeningAtasNama = $f['rek_atas_nama'] ?: $f['atas_nama'];
-            $keterangan = $f['keterangan'] ?: ($f['nama_project'] ?? $f['project']);
+            $keterangan = $f['keterangan'] ?: '-';
             $pajak = ($f['pph21'] == 1) ? (double) $f['jumlah_pph'] : (double) $f['jumlah_nopph'];
             $diterima = ($f['pph21'] == 1)
                 ? ((double) $f['total'] - (double) $f['jumlah_pph'])
@@ -814,7 +814,7 @@ class FeeDokter extends CI_Controller
                 $rekeningBank = $f['rek_bank'] ?: $f['bank'];
                 $rekeningKcp = $f['rek_kcp'] ?: $f['kcp'];
                 $rekeningAtasNama = $f['rek_atas_nama'] ?: $f['atas_nama'];
-                $keterangan = $f['keterangan'] ?: ($f['nama_project'] ?? $f['project']);
+                $keterangan = $f['keterangan'] ?: '-';
                 $pajak = ($f['pph21'] == 1) ? (double) $f['jumlah_pph'] : (double) $f['jumlah_nopph'];
                 $diterima = ($f['pph21'] == 1)
                     ? ((double) $f['total'] - (double) $f['jumlah_pph'])

@@ -250,7 +250,7 @@ $namaBulan = [
                                 <?php endif; ?>
                             </td>
                             <td class="text-end">Rp <?= number_format($f['total'], 0, ',', '.'); ?></td>
-                            <td><?= html_escape($f['keterangan'] ?: ($f['nama_project'] ?? $f['project'] ?? '-')); ?></td>
+                            <td><?= html_escape($f['keterangan'] ?: '-'); ?></td>
                             <td class="text-center">
                                 <?= !empty($f['tgl_project']) ? tanggal_indonesia_medium(date($f['tgl_project'])) : '-'; ?>
                             </td>
