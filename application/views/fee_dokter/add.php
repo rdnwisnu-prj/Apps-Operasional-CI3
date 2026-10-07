@@ -128,7 +128,7 @@
                         <div class="col-lg-4">
                             <select class="form-control" id="spesialis" name="spesialis">
                                 <option value="">-- Pilih Spesialis --</option>
-                                <?php foreach (['dr. Sp.PD','dr. Sp.Paru','dr. Sp.Jantung','dr. Sp.Mata','dr. Sp.THT','dr. Sp.Urologi','dr. Sp. Gizi','dr. Sp.KFR','dr. Sp.Orthopedi','dr. Sp.Bedah','dr. Sp.Psikiatri','dr. Sp.KK','dr. Gigi','dr. Umum','Radiologi'] as $sp): ?>
+                                <?php foreach (['dr. Sp.PD','dr. Sp.Paru','dr. Sp.Jantung','dr. Sp.Mata','dr. Sp.THT','dr. Sp.Urologi','dr. Sp. Gizi','dr. Sp.KFR','dr. Sp.Orthopedi','dr. Sp.Bedah','dr. Sp.Psikiatri','dr. Sp.KK','dr. Gigi','dr. Umum','Radiologi', 'Dokter Sp. OK', 'Dokter Sp. PK'] as $sp): ?>
                                 <option value="<?= html_escape($sp); ?>" <?= set_select('spesialis', $sp); ?>>
                                     <?= html_escape($sp); ?></option>
                                 <?php endforeach; ?>

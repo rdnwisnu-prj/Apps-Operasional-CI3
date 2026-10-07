@@ -1,14 +1,11 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-        <div>
-            <a href="#" class="logo logo-normal">
-                <img src="<?= base_url() ?>assets/img/logo/transparent.png" alt="Logo" width="100">
+        <div class="sidebar-brand-wrap">
+            <a href="<?= base_url(); ?>" class="logo logo-normal sidebar-brand sidebar-brand-full">
+                <img src="<?= base_url('assets/img/sidebar.png'); ?>" alt="Cakra Medika Marketing & CRM">
             </a>
-            <a href="#" class="logo-small">
-                <img src="<?= base_url() ?>assets/img/logo/transparent.png" alt="Logo" width="100">
-            </a>
-            <a href="#" class="dark-logo">
-                <img src="<?= base_url() ?>assets/img/logo/transparent.png " alt="Logo" width="100">
+            <a href="<?= base_url(); ?>" class="logo-small sidebar-brand sidebar-brand-sm">
+                <img src="<?= base_url('assets/img/sidebar-icon.png'); ?>" alt="Cakra Medika Marketing & CRM">
             </a>
         </div>
         <button class="sidenav-toggle-btn btn border-0 p-0 active" id="toggle_btn">

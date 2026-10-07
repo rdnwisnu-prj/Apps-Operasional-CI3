@@ -47,7 +47,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 p-0">
                     <li class="breadcrumb-item"><a href="javascript:void(0);"><?= $header; ?></a></li>
-                    <li class="breadcrumb-item"><a href="<?= base_url($baseRoute); ?>"><?= html_escape($pageLabel); ?></a></li>
+                    <li class="breadcrumb-item"><a
+                            href="<?= base_url($baseRoute); ?>"><?= html_escape($pageLabel); ?></a></li>
                     <li class="breadcrumb-item active"><?= $subheader; ?></li>
                 </ol>
             </nav>
@@ -64,17 +65,21 @@
             </div>
 
             <div class="card-body">
-                <form id="form-edit-fee" action="<?= base_url($baseRoute . '/update'); ?>" method="post" enctype="multipart/form-data">
+                <form id="form-edit-fee" action="<?= base_url($baseRoute . '/update'); ?>" method="post"
+                    enctype="multipart/form-data">
                     <input type="hidden" name="id_fee" value="<?= (int) $edit_data['id_fee']; ?>">
 
                     <?php if ($showProject): ?>
                     <div class="row mb-3">
-                        <label for="project" class="col-form-label col-lg-2">Project <span class="text-danger">*</span></label>
+                        <label for="project" class="col-form-label col-lg-2">Project <span
+                                class="text-danger">*</span></label>
                         <div class="col-lg-10">
-                            <select class="form-select <?= form_error('project') ? 'is-invalid' : ''; ?>" id="project" name="project">
+                            <select class="form-select <?= form_error('project') ? 'is-invalid' : ''; ?>" id="project"
+                                name="project">
                                 <option value="">-- Pilih Project --</option>
                                 <?php foreach ($projects as $p): ?>
-                                <option value="<?= html_escape($p['kode_project']); ?>" <?= set_select('project', $p['kode_project'], ($edit_data['project'] ?? '') === $p['kode_project']); ?>>
+                                <option value="<?= html_escape($p['kode_project']); ?>"
+                                    <?= set_select('project', $p['kode_project'], ($edit_data['project'] ?? '') === $p['kode_project']); ?>>
                                     <?= html_escape($p['kode_project'] . ' - ' . $p['nama_project']); ?>
                                 </option>
                                 <?php endforeach; ?>
@@ -85,18 +90,25 @@
                     <?php endif; ?>
 
                     <div class="row mb-3">
-                        <label for="tgl_project" class="col-form-label col-lg-2">Tanggal <span class="text-danger">*</span></label>
+                        <label for="tgl_project" class="col-form-label col-lg-2">Tanggal <span
+                                class="text-danger">*</span></label>
                         <div class="col-lg-4">
-                            <input type="text" class="form-control <?= form_error('tgl_project') ? 'is-invalid' : ''; ?>" id="tgl_project" name="tgl_project" value="<?= html_escape($oldTanggal); ?>" placeholder="Pilih tanggal" autocomplete="off">
+                            <input type="text"
+                                class="form-control <?= form_error('tgl_project') ? 'is-invalid' : ''; ?>"
+                                id="tgl_project" name="tgl_project" value="<?= html_escape($oldTanggal); ?>"
+                                placeholder="Pilih tanggal" autocomplete="off">
                             <div class="invalid-feedback"><?= form_error('tgl_project'); ?></div>
                             <small class="text-muted" id="date-range-info">Tanggal tidak dibatasi oleh project.</small>
                         </div>
-                        <label for="cabang" class="col-form-label col-lg-2">Cabang <span class="text-danger">*</span></label>
+                        <label for="cabang" class="col-form-label col-lg-2">Cabang <span
+                                class="text-danger">*</span></label>
                         <div class="col-lg-4">
-                            <select class="form-control <?= form_error('cabang') ? 'is-invalid' : ''; ?>" id="cabang" name="cabang">
+                            <select class="form-control <?= form_error('cabang') ? 'is-invalid' : ''; ?>" id="cabang"
+                                name="cabang">
                                 <option value="">-- Pilih Cabang --</option>
                                 <?php foreach ($cabang as $c): ?>
-                                <option value="<?= (int) $c['id_cabang']; ?>" <?= set_select('cabang', $c['id_cabang'], (string) ($edit_data['cabang'] ?? '') === (string) $c['id_cabang']); ?>>
+                                <option value="<?= (int) $c['id_cabang']; ?>"
+                                    <?= set_select('cabang', $c['id_cabang'], (string) ($edit_data['cabang'] ?? '') === (string) $c['id_cabang']); ?>>
                                     <?= html_escape($c['nama_cabang']); ?>
                                 </option>
                                 <?php endforeach; ?>
@@ -109,9 +121,11 @@
                     <h5 class="mb-3"><i class="ti ti-stethoscope me-1"></i> Data Dokter</h5>
 
                     <div class="row mb-3">
-                        <label for="dokter_id" class="col-form-label col-lg-2">Nama Dokter <span class="text-danger">*</span></label>
+                        <label for="dokter_id" class="col-form-label col-lg-2">Nama Dokter <span
+                                class="text-danger">*</span></label>
                         <div class="col-lg-10">
-                            <select class="form-select <?= form_error('dokter_id') ? 'is-invalid' : ''; ?>" id="dokter_id" name="dokter_id">
+                            <select class="form-select <?= form_error('dokter_id') ? 'is-invalid' : ''; ?>"
+                                id="dokter_id" name="dokter_id">
                                 <option value="">-- Pilih Dokter --</option>
                                 <?php foreach ($dokter as $d): ?>
                                 <option value="<?= (int) $d['id_dokter']; ?>"
@@ -134,14 +148,17 @@
                         <div class="col-lg-4">
                             <select class="form-control" id="spesialis" name="spesialis">
                                 <option value="">-- Pilih Spesialis --</option>
-                                <?php foreach (['dr. Sp.PD','dr. Sp.Paru','dr. Sp.Jantung','dr. Sp.Mata','dr. Sp.THT','dr. Sp.Urologi','dr. Sp. Gizi','dr. Sp.KFR','dr. Sp.Orthopedi','dr. Sp.Bedah','dr. Sp.Psikiatri','dr. Sp.KK','dr. Gigi','dr. Umum','Radiologi'] as $sp): ?>
-                                <option value="<?= html_escape($sp); ?>" <?= set_select('spesialis', $sp, ($edit_data['spesialis'] ?? '') === $sp); ?>><?= html_escape($sp); ?></option>
+                                <?php foreach (['dr. Sp.PD','dr. Sp.Paru','dr. Sp.Jantung','dr. Sp.Mata','dr. Sp.THT','dr. Sp.Urologi','dr. Sp. Gizi','dr. Sp.KFR','dr. Sp.Orthopedi','dr. Sp.Bedah','dr. Sp.Psikiatri','dr. Sp.KK','dr. Gigi','dr. Umum','Radiologi','Dokter Sp. OK','Dokter Sp. PK'] as $sp): ?>
+                                <option value="<?= html_escape($sp); ?>"
+                                    <?= set_select('spesialis', $sp, ($edit_data['spesialis'] ?? '') === $sp); ?>>
+                                    <?= html_escape($sp); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <label for="ktp" class="col-form-label col-lg-2">No. KTP</label>
                         <div class="col-lg-4">
-                            <input type="text" class="form-control bg-light" id="ktp" name="ktp" placeholder="No. KTP" value="<?= set_value('ktp', $edit_data['ktp'] ?? ''); ?>" readonly>
+                            <input type="text" class="form-control bg-light" id="ktp" name="ktp" placeholder="No. KTP"
+                                value="<?= set_value('ktp', $edit_data['ktp'] ?? ''); ?>" readonly>
                         </div>
                     </div>
 
@@ -151,19 +168,23 @@
                     <div class="row g-3 mb-3">
                         <div class="col-lg-3">
                             <label class="form-label small">Bank</label>
-                            <input type="text" class="form-control bg-light" id="dokter_bank" readonly value="<?= html_escape($edit_data['bank'] ?? ''); ?>">
+                            <input type="text" class="form-control bg-light" id="dokter_bank" readonly
+                                value="<?= html_escape($edit_data['bank'] ?? ''); ?>">
                         </div>
                         <div class="col-lg-3">
                             <label class="form-label small">No. Rekening</label>
-                            <input type="text" class="form-control bg-light" id="dokter_no_rekening" readonly value="<?= html_escape($edit_data['no_rek'] ?? ''); ?>">
+                            <input type="text" class="form-control bg-light" id="dokter_no_rekening" readonly
+                                value="<?= html_escape($edit_data['no_rek'] ?? ''); ?>">
                         </div>
                         <div class="col-lg-3">
                             <label class="form-label small">Atas Nama</label>
-                            <input type="text" class="form-control bg-light" id="dokter_atas_nama" readonly value="<?= html_escape($edit_data['atas_nama'] ?? ''); ?>">
+                            <input type="text" class="form-control bg-light" id="dokter_atas_nama" readonly
+                                value="<?= html_escape($edit_data['atas_nama'] ?? ''); ?>">
                         </div>
                         <div class="col-lg-3">
                             <label class="form-label small">KCP</label>
-                            <input type="text" class="form-control bg-light" id="dokter_kcp" readonly value="<?= html_escape($edit_data['kcp'] ?? ''); ?>">
+                            <input type="text" class="form-control bg-light" id="dokter_kcp" readonly
+                                value="<?= html_escape($edit_data['kcp'] ?? ''); ?>">
                         </div>
                     </div>
 
@@ -182,14 +203,18 @@
                     <div class="row mb-3">
                         <label for="jumlah_hari" class="col-form-label col-lg-2">Jumlah Hari</label>
                         <div class="col-lg-4">
-                            <input type="number" class="form-control" id="jumlah_hari" name="jumlah_hari" placeholder="0" min="0" value="<?= set_value('jumlah_hari', $edit_data['jumlah_hari'] ?? '0'); ?>">
+                            <input type="number" class="form-control" id="jumlah_hari" name="jumlah_hari"
+                                placeholder="0" min="0"
+                                value="<?= set_value('jumlah_hari', $edit_data['jumlah_hari'] ?? '0'); ?>">
                         </div>
                         <label for="fee_display" class="col-form-label col-lg-2">Fee / Hari (Rp)</label>
                         <div class="col-lg-4">
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
-                                <input type="text" class="form-control format-number" id="fee_display" placeholder="0" autocomplete="off">
-                                <input type="hidden" id="fee" name="fee" value="<?= set_value('fee', $edit_data['fee'] ?? '0'); ?>">
+                                <input type="text" class="form-control format-number" id="fee_display" placeholder="0"
+                                    autocomplete="off">
+                                <input type="hidden" id="fee" name="fee"
+                                    value="<?= set_value('fee', $edit_data['fee'] ?? '0'); ?>">
                             </div>
                         </div>
                     </div>
@@ -199,30 +224,41 @@
                         <div class="col-lg-4">
                             <select class="form-select" id="jenis_biaya_tambahan" name="jenis_biaya_tambahan">
                                 <option value="">-- Pilih Jenis --</option>
-                                <option value="Lembur" <?= set_select('jenis_biaya_tambahan', 'Lembur', ($edit_data['jenis_biaya_tambahan'] ?? '') === 'Lembur'); ?>>Lembur</option>
-                                <option value="Lain-Lain" <?= set_select('jenis_biaya_tambahan', 'Lain-Lain', ($edit_data['jenis_biaya_tambahan'] ?? '') === 'Lain-Lain'); ?>>Lain-Lain</option>
+                                <option value="Lembur"
+                                    <?= set_select('jenis_biaya_tambahan', 'Lembur', ($edit_data['jenis_biaya_tambahan'] ?? '') === 'Lembur'); ?>>
+                                    Lembur</option>
+                                <option value="Lain-Lain"
+                                    <?= set_select('jenis_biaya_tambahan', 'Lain-Lain', ($edit_data['jenis_biaya_tambahan'] ?? '') === 'Lain-Lain'); ?>>
+                                    Lain-Lain</option>
                             </select>
                         </div>
                         <label for="biaya_tambahan_display" class="col-form-label col-lg-2">Nominal (Rp)</label>
                         <div class="col-lg-4">
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
-                                <input type="text" class="form-control format-number" id="biaya_tambahan_display" placeholder="0" autocomplete="off">
-                                <input type="hidden" id="biaya_tambahan" name="biaya_tambahan" value="<?= set_value('biaya_tambahan', $edit_data['biaya_tambahan'] ?? '0'); ?>">
+                                <input type="text" class="form-control format-number" id="biaya_tambahan_display"
+                                    placeholder="0" autocomplete="off">
+                                <input type="hidden" id="biaya_tambahan" name="biaya_tambahan"
+                                    value="<?= set_value('biaya_tambahan', $edit_data['biaya_tambahan'] ?? '0'); ?>">
                             </div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
-                        <label for="total_display" class="col-form-label col-lg-2">Total Fee (Rp) <span class="text-danger">*</span></label>
+                        <label for="total_display" class="col-form-label col-lg-2">Total Fee (Rp) <span
+                                class="text-danger">*</span></label>
                         <div class="col-lg-10">
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
-                                <input type="text" class="form-control format-number <?= form_error('total') ? 'is-invalid' : ''; ?>" id="total_display" placeholder="0" autocomplete="off">
-                                <input type="hidden" id="total" name="total" value="<?= set_value('total', $edit_data['total'] ?? '0'); ?>">
+                                <input type="text"
+                                    class="form-control format-number <?= form_error('total') ? 'is-invalid' : ''; ?>"
+                                    id="total_display" placeholder="0" autocomplete="off">
+                                <input type="hidden" id="total" name="total"
+                                    value="<?= set_value('total', $edit_data['total'] ?? '0'); ?>">
                             </div>
                             <div class="invalid-feedback"><?= form_error('total'); ?></div>
-                            <small class="text-muted">Total otomatis dari (Jumlah Hari x Fee) + Biaya Tambahan, dan masih bisa disesuaikan manual.</small>
+                            <small class="text-muted">Total otomatis dari (Jumlah Hari x Fee) + Biaya Tambahan, dan
+                                masih bisa disesuaikan manual.</small>
                         </div>
                     </div>
 
@@ -234,17 +270,21 @@
                         <div class="col-lg-10">
                             <div class="d-flex gap-4 pt-1 flex-wrap">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="pph21" id="pajak_pph21" value="1" <?= set_value('pph21', (string) ($edit_data['pph21'] ?? '1')) === '1' ? 'checked' : ''; ?>>
+                                    <input class="form-check-input" type="radio" name="pph21" id="pajak_pph21" value="1"
+                                        <?= set_value('pph21', (string) ($edit_data['pph21'] ?? '1')) === '1' ? 'checked' : ''; ?>>
                                     <label class="form-check-label" for="pajak_pph21">
                                         <strong>PPH21</strong>
                                         <small class="text-muted d-block">Pajak 2.5% dipotong dari total fee.</small>
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="pph21" id="pajak_nonpph21" value="0" <?= set_value('pph21', (string) ($edit_data['pph21'] ?? '1')) === '0' ? 'checked' : ''; ?>>
+                                    <input class="form-check-input" type="radio" name="pph21" id="pajak_nonpph21"
+                                        value="0"
+                                        <?= set_value('pph21', (string) ($edit_data['pph21'] ?? '1')) === '0' ? 'checked' : ''; ?>>
                                     <label class="form-check-label" for="pajak_nonpph21">
                                         <strong>Non-PPH21</strong>
-                                        <small class="text-muted d-block">Diterima dokter dihitung dari Total Fee / 97.5%.</small>
+                                        <small class="text-muted d-block">Diterima dokter dihitung dari Total Fee /
+                                            97.5%.</small>
                                     </label>
                                 </div>
                             </div>
@@ -258,7 +298,8 @@
                         </div>
                         <label class="col-form-label col-lg-2">Diterima Dokter</label>
                         <div class="col-lg-4">
-                            <input type="text" class="form-control bg-light" id="preview_diterima" readonly value="Rp 0">
+                            <input type="text" class="form-control bg-light" id="preview_diterima" readonly
+                                value="Rp 0">
                         </div>
                     </div>
 
@@ -267,9 +308,11 @@
                     <div class="row mb-3">
                         <label for="lampiran" class="col-form-label col-lg-2">Lampiran</label>
                         <div class="col-lg-10">
-                            <input type="file" class="form-control" id="lampiran" name="lampiran" accept=".jpg,.jpeg,.png">
+                            <input type="file" class="form-control" id="lampiran" name="lampiran"
+                                accept=".jpg,.jpeg,.png">
                             <?php if (!empty($edit_data['lampiran'])): ?>
-                            <a href="<?= base_url('uploads/lampiran/' . $edit_data['lampiran']); ?>" target="_blank" class="d-inline-block mt-2">
+                            <a href="<?= base_url('uploads/lampiran/' . $edit_data['lampiran']); ?>" target="_blank"
+                                class="d-inline-block mt-2">
                                 <i class="ti ti-photo me-1"></i>Lihat lampiran saat ini
                             </a>
                             <?php endif; ?>
@@ -280,7 +323,8 @@
                     <div class="row mb-3">
                         <label for="keterangan" class="col-form-label col-lg-2">Keterangan</label>
                         <div class="col-lg-10">
-                            <textarea class="form-control" id="keterangan" name="keterangan" rows="3" placeholder="Keterangan"><?= set_value('keterangan', $edit_data['keterangan'] ?? ''); ?></textarea>
+                            <textarea class="form-control" id="keterangan" name="keterangan" rows="3"
+                                placeholder="Keterangan"><?= set_value('keterangan', $edit_data['keterangan'] ?? ''); ?></textarea>
                         </div>
                     </div>
                 </form>
@@ -418,26 +462,31 @@
         }
 
         var rekIndex = 0;
-        var bankOptions = `<?php foreach ($bankOptions as $bank): ?><option value="<?= html_escape($bank); ?>"><?= html_escape($bank); ?></option><?php endforeach; ?>`;
+        var bankOptions =
+            `<?php foreach ($bankOptions as $bank): ?><option value="<?= html_escape($bank); ?>"><?= html_escape($bank); ?></option><?php endforeach; ?>`;
 
         function addRekeningRow(data) {
             data = data || {};
-            var checked = data.is_active == 1 || $('#rekening-container input[name="rek_active"]:checked').length === 0 ? ' checked' : '';
-            var html = ''
-                + '<div class="rekening-row border rounded p-3 mb-3 position-relative" data-index="' + rekIndex + '">'
-                + '<div class="d-flex justify-content-between align-items-center mb-2">'
-                + '<div class="form-check">'
-                + '<input class="form-check-input" type="radio" name="rek_active" value="' + rekIndex + '"' + checked + '>'
-                + '<label class="form-check-label"><strong>Rekening Aktif Tambahan</strong></label>'
-                + '</div>'
-                + '<button type="button" class="btn btn-sm btn-outline-danger btn-remove-rek"><i class="ti ti-x"></i></button>'
-                + '</div>'
-                + '<div class="row g-2">'
-                + '<div class="col-lg-3"><label class="form-label small">Bank</label><select class="form-select form-select-sm" name="rek_bank[]"><option value="">-- Pilih Bank --</option>' + bankOptions + '</select></div>'
-                + '<div class="col-lg-3"><label class="form-label small">No. Rekening</label><input type="text" class="form-control form-control-sm" name="rek_no_rek[]" placeholder="No. Rekening"></div>'
-                + '<div class="col-lg-3"><label class="form-label small">Atas Nama</label><input type="text" class="form-control form-control-sm" name="rek_atas_nama[]" placeholder="Atas Nama"></div>'
-                + '<div class="col-lg-3"><label class="form-label small">KCP</label><input type="text" class="form-control form-control-sm" name="rek_kcp[]" placeholder="KCP"></div>'
-                + '</div></div>';
+            var checked = data.is_active == 1 || $('#rekening-container input[name="rek_active"]:checked')
+                .length === 0 ? ' checked' : '';
+            var html = '' +
+                '<div class="rekening-row border rounded p-3 mb-3 position-relative" data-index="' + rekIndex +
+                '">' +
+                '<div class="d-flex justify-content-between align-items-center mb-2">' +
+                '<div class="form-check">' +
+                '<input class="form-check-input" type="radio" name="rek_active" value="' + rekIndex + '"' +
+                checked + '>' +
+                '<label class="form-check-label"><strong>Rekening Aktif Tambahan</strong></label>' +
+                '</div>' +
+                '<button type="button" class="btn btn-sm btn-outline-danger btn-remove-rek"><i class="ti ti-x"></i></button>' +
+                '</div>' +
+                '<div class="row g-2">' +
+                '<div class="col-lg-3"><label class="form-label small">Bank</label><select class="form-select form-select-sm" name="rek_bank[]"><option value="">-- Pilih Bank --</option>' +
+                bankOptions + '</select></div>' +
+                '<div class="col-lg-3"><label class="form-label small">No. Rekening</label><input type="text" class="form-control form-control-sm" name="rek_no_rek[]" placeholder="No. Rekening"></div>' +
+                '<div class="col-lg-3"><label class="form-label small">Atas Nama</label><input type="text" class="form-control form-control-sm" name="rek_atas_nama[]" placeholder="Atas Nama"></div>' +
+                '<div class="col-lg-3"><label class="form-label small">KCP</label><input type="text" class="form-control form-control-sm" name="rek_kcp[]" placeholder="KCP"></div>' +
+                '</div></div>';
 
             $('#rekening-container').append(html);
             var $row = $('#rekening-container .rekening-row:last');
@@ -453,9 +502,10 @@
             $('#project').off('change.feeDokter').on('change.feeDokter', updateProjectDateRange);
         }
         $('#dokter_id').off('change.feeDokter').on('change.feeDokter', updateDoctorAccount);
-        $('#jumlah_hari, #fee_display, #biaya_tambahan_display').off('input.feeDokter').on('input.feeDokter', function() {
-            setTimeout(hitungTotal, 30);
-        });
+        $('#jumlah_hari, #fee_display, #biaya_tambahan_display').off('input.feeDokter').on('input.feeDokter',
+            function() {
+                setTimeout(hitungTotal, 30);
+            });
         $('#total_display').off('input.feeDokter').on('input.feeDokter', function() {
             setTimeout(hitungPajak, 30);
         });
@@ -463,15 +513,18 @@
         $('#btn-add-rek').off('click.feeDokterRekening').on('click.feeDokterRekening', function() {
             addRekeningRow();
         });
-        $(document).off('click.feeDokterRekening', '.btn-remove-rek').on('click.feeDokterRekening', '.btn-remove-rek', function() {
-            var $row = $(this).closest('.rekening-row');
-            var wasActive = $row.find('input[name="rek_active"]').is(':checked');
-            $row.remove();
-            if (wasActive) {
-                $('#rekening-container .rekening-row:first input[name="rek_active"]').prop('checked', true);
-            }
-            toggleEmptyInfo();
-        });
+        $(document).off('click.feeDokterRekening', '.btn-remove-rek').on('click.feeDokterRekening',
+            '.btn-remove-rek',
+            function() {
+                var $row = $(this).closest('.rekening-row');
+                var wasActive = $row.find('input[name="rek_active"]').is(':checked');
+                $row.remove();
+                if (wasActive) {
+                    $('#rekening-container .rekening-row:first input[name="rek_active"]').prop('checked',
+                        true);
+                }
+                toggleEmptyInfo();
+            });
 
         $.each(existingRekening, function(_, item) {
             addRekeningRow(item);

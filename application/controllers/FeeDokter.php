@@ -109,7 +109,7 @@ class FeeDokter extends CI_Controller
     {
         $roleId = (int) $this->session->userdata('role_id');
 
-        if (in_array($roleId, [1, 2, 3], true)) {
+        if (in_array($roleId, [1, 2, 3, 6, 7], true)) {
             return [];
         }
 

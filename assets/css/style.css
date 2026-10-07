@@ -199,25 +199,25 @@ body.login-page {
 }
 
 .btn-custom {
-	background-color: #800080;
-	border: 2px solid #800080;
+	background-color: rgb(23 18 58 / 1);;
+	border: 2px solid rgb(23 18 58 / 1);;
 	color: #fff;
 }
 
 .btn-custom:hover {
-	background-color: #800080;
-	border: 2px solid #800080;
+	background-color: rgb(23 18 58 / 1);;
+	border: 2px solid rgb(23 18 58 / 1);;
 	color: #fff;
 }
 
 .btn-custom:active {
-	background-color: #800080;
-	border: 2px solid #800080;
+	background-color: rgb(23 18 58 / 1);;
+	border: 2px solid rgb(23 18 58 / 1);;
 	color: #fff;
 }
 
 .border-custom {
-	border-color: #800080 !important;
+	border-color: rgb(23 18 58 / 1); !important;
 	opacity: 1 !important;
 }
 
