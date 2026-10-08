@@ -82,6 +82,23 @@ jobs:
             **/.git*/**
             **/.github/**
             **/node_modules/**
+            **/test/**
+            **/tests/**
+            **/Test/**
+            **/Tests/**
+            **/docs/**
+            **/doc/**
+            **/examples/**
+            **/example/**
+            **/samples/**
+            **/sample/**
+            **/.travis.yml
+            **/phpunit.xml*
+            **/phpcs.xml*
+            **/README*
+            **/CHANGELOG*
+            **/CONTRIBUTING*
+            **/UPGRADE*
             .gitignore
             .cpanel.yml
             deploy.ps1
