@@ -11,13 +11,15 @@ permissions:
 
 concurrency:
   group: apps-operasional-production
-  cancel-in-progress: true
+  # Jangan memutus upload FTPS yang sedang berjalan.
+  cancel-in-progress: false
 
 jobs:
   deploy:
     name: Deployment production FTPS
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    # Initial sync bisa besar. Deploy berikutnya hanya mengirim file berubah.
+    timeout-minutes: 240
 
     steps:
       - name: Ambil source code
@@ -45,11 +47,6 @@ jobs:
           echo "Vendor Composer berhasil dibuat."
           du -sh vendor
 
-      - name: Instal lftp
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lftp
-
       - name: Validasi konfigurasi FTP
         shell: bash
         env:
@@ -63,51 +60,41 @@ jobs:
           test -n "$FTP_PASSWORD"
           test -n "$FTP_PORT"
 
-      - name: Upload source dan vendor ke production
-        shell: bash
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_PORT: ${{ secrets.FTP_PORT }}
-        run: |
-          lftp \
-            -u "$FTP_USERNAME","$FTP_PASSWORD" \
-            -p "$FTP_PORT" \
-            "$FTP_SERVER" <<'LFTP_COMMANDS'
-
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ftp:passive-mode true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          set net:max-retries 10
-          set net:timeout 120
-          set net:reconnect-interval-base 5
-          set net:reconnect-interval-max 30
-
-          cls -1
-
-          mirror --reverse --verbose --parallel=1 \
-            --exclude-glob=.git/** \
-            --exclude-glob=.github/** \
-            --exclude-glob=.gitignore \
-            --exclude-glob=.cpanel.yml \
-            --exclude-glob=deploy.ps1 \
-            --exclude-glob=.env \
-            --exclude-glob=*.sql \
-            --exclude-glob=*.zip \
-            --exclude-glob=*.tar \
-            --exclude-glob=*.gz \
-            --exclude-glob=application/config/database.php \
-            --exclude-glob=application/config/config.php \
-            --exclude-glob=application/config/email.php \
-            --exclude-glob=application/cache/** \
-            --exclude-glob=application/logs/** \
-            --exclude-glob=application/sessions/** \
-            --exclude-glob=uploads/** \
-            --exclude-glob=assets/uploads/** \
-            ./ ./
-
-          bye
-          LFTP_COMMANDS
+      - name: Sinkronisasi incremental ke production
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ftps
+          local-dir: ./
+          server-dir: ./
+          # State disimpan di root production agar daftar file tersinkron
+          # tetap tersedia pada runner GitHub yang selalu fresh.
+          state-name: .ftp-deploy-sync-state.json
+          # Konfigurasi lama mematikan validasi hostname sertifikat FTPS.
+          security: loose
+          log-level: standard
+          timeout: 120000
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/node_modules/**
+            .gitignore
+            .cpanel.yml
+            deploy.ps1
+            .env
+            *.sql
+            *.zip
+            *.tar
+            *.gz
+            application/config/database.php
+            application/config/config.php
+            application/config/email.php
+            application/cache/**
+            application/logs/**
+            application/sessions/**
+            uploads/**
+            assets/uploads/**
