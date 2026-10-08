@@ -47,6 +47,28 @@ jobs:
           echo "Vendor Composer berhasil dibuat."
           du -sh vendor
 
+      - name: Bersihkan file non-runtime dari paket deploy
+        shell: bash
+        run: |
+          set -e
+
+          for dir in application/third_party vendor; do
+            if [ -d "$dir" ]; then
+              find "$dir" \( \
+                -type d \( -iname "test" -o -iname "tests" -o -iname "doc" -o -iname "docs" -o -iname "example" -o -iname "examples" -o -iname "sample" -o -iname "samples" \) \
+                -o -type d \( -name ".github" -o -name ".git" \) \
+              \) -prune -exec rm -rf {} +
+
+              find "$dir" -type f \( \
+                -iname "README*" -o -iname "CHANGELOG*" -o -iname "CONTRIBUTING*" -o -iname "UPGRADE*" \
+                -o -iname "phpunit.xml*" -o -iname "phpcs.xml*" -o -iname ".travis.yml" \
+              \) -delete
+            fi
+          done
+
+          echo "Paket deploy setelah cleanup:"
+          du -sh application/third_party vendor
+
       - name: Validasi konfigurasi FTP
         shell: bash
         env:
